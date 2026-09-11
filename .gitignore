@@ -14,3 +14,11 @@ Desktop.ini
 
 # Logs
 *.log
+
+# Frontend generated files
+node_modules/
+dist/
+*.tsbuildinfo
+playwright-report/
+test-results/
+.pnpm-store/

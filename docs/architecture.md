@@ -1,6 +1,6 @@
 # Architecture
 
-StudyHive is in the planning stage. This document describes the intended design; technology choices and concrete modules remain to be defined.
+StudyHive now has a frontend-only Study Buddy demo. The backend architecture below remains planned and is owned by the backend teammate.
 
 ## Principle
 
@@ -15,7 +15,7 @@ StudyHive is in the planning stage. This document describes the intended design;
 | Data access | Load and persist profiles, groups, projects, and requests. |
 | Shared contracts | Define the data exchanged between these areas. |
 
-These are conceptual boundaries, not existing subdirectories. Application code will live under `src/`; its internal structure will be chosen with the scaffold.
+The frontend lives in `src/ui/`, including layout, filters, students, reusable components, styles, and fictional data. `src/types/student.ts` contains display contracts. `src/App.tsx` and `src/main.tsx` provide application wiring. No core business logic or persistence layer is implemented. See [frontend-contract.md](frontend-contract.md).
 
 ## Design Direction
 
@@ -26,7 +26,7 @@ These are conceptual boundaries, not existing subdirectories. Application code w
 
 ## Decisions to Make
 
-- Frontend framework and development tooling.
+- Frontend chosen: React + TypeScript + Vite + Tailwind CSS, with ESLint and Playwright checks. System fonts and inline SVG keep the demo independent of external asset services.
 - Backend, database, and authentication approach.
 - Data contracts, request lifecycle, and membership rules.
 - Matching factors, availability representation, and test tooling.

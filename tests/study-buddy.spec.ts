@@ -1,0 +1,58 @@
+import { test, expect } from '@playwright/test';
+test('four profiles, local filters, empty state and reset', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Find your people.' })).toBeVisible();
+  await expect(page.locator('.student-card')).toHaveCount(4);
+  await page.getByLabel('Course', { exact: true }).selectOption('Operating Systems');
+  await expect(page.locator('.student-card')).toHaveCount(1);
+  await expect(page.getByText('1 student found', { exact: true })).toBeVisible();
+  await page.getByLabel('Major', { exact: true }).selectOption('Materials Science');
+  await expect(page.getByText('No study buddies found just yet.')).toBeVisible();
+  await page.getByRole('button', { name: 'Show all students' }).click();
+  await expect(page.locator('.student-card')).toHaveCount(4);
+  await page.getByRole('switch', { name: 'Free Tonight' }).click();
+  await expect(page.locator('.student-card')).toHaveCount(2);
+  await expect(page.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
+  await page.getByLabel('Availability', { exact: true }).selectOption('afternoons');
+  await expect(page.locator('.student-card')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Reset filters' }).click();
+  await page.getByLabel('Study style', { exact: true }).selectOption('discussion');
+  await expect(page.locator('.student-card')).toHaveCount(2);
+  await page.getByLabel('Entry year', { exact: true }).selectOption('2024');
+  await expect(page.locator('.student-card')).toHaveCount(1);
+});
+test('profile request state, keyboard close, focus return and session-only behavior', async ({ page }) => {
+  await page.goto('/');
+  const view = page.getByRole('button', { name: 'View profile' }).first();
+  await view.click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: 'Lin Chen' })).toBeVisible();
+  await page.screenshot({ path: 'test-results/studyhive-profile.png' });
+  await dialog.getByRole('button', { name: 'Send Study Request' }).click();
+  await expect(dialog.getByRole('button', { name: 'Request sent', exact: true })).toBeDisabled();
+  await expect(dialog.getByRole('status')).toContainText('Study request sent.');
+  await page.keyboard.press('Escape');
+  await expect(dialog).not.toBeVisible();
+  await expect(view).toBeFocused();
+  await view.click();
+  await expect(dialog.getByRole('button', { name: 'Request sent', exact: true })).toBeDisabled();
+  await dialog.getByRole('button', { name: 'Close profile' }).click();
+  await page.reload();
+  await view.click();
+  await expect(dialog.getByRole('button', { name: 'Send Study Request' })).toBeEnabled();
+  await page.mouse.click(10, 10);
+  await expect(dialog).not.toBeVisible();
+});
+test('desktop and mobile remain within viewport with usable modal', async ({ page }) => {
+  for (const width of [1536, 1440, 390]) {
+    await page.setViewportSize({ width, height: 1024 });
+    await page.goto('/');
+    await expect(page.locator('.student-card')).toHaveCount(4);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.screenshot({ path: 'test-results/studyhive-' + width + '.png', fullPage: true });
+    await page.getByRole('button', { name: 'View profile' }).first().click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByRole('button', { name: 'Close profile' }).click();
+  }
+});

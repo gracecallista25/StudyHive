@@ -17,4 +17,4 @@ See [README.md](README.md) for the product scope and development status, and [ar
 - Never commit secrets. Add configuration names and safe placeholders to `.env.example` as needed.
 - Prefer small, reliable features with working interactions.
 
-Setup and check commands will be documented in the README when the application tooling is added.
+See the README for setup. Run `npm run typecheck`, `npm run lint`, and `npm run build` before submitting frontend changes; use `npm run test:ui` for interaction changes.

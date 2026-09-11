@@ -3,7 +3,7 @@
 
 StudyHive is a planned desktop-first collaboration platform for HITSZ students. Finding a study partner or project teammate often means asking across group chats and personal networks. StudyHive aims to bring that search into one place, helping students find study partners, small groups, project teammates, and seniors with relevant course experience.
 
-**Current status: planning stage.** The repository is initialized, but contains no application code yet. All product features below are planned; there is no runnable demo.
+**Current status: frontend demo.** A runnable React + TypeScript + Vite + Tailwind CSS Study Buddy page is available. It includes local filters, fictional student profiles, and a profile modal with demo-only request feedback. The other product areas and all backend functionality remain planned.
 
 ## Why StudyHive?
 
@@ -11,7 +11,7 @@ Finding someone who takes the same course, is free at the same time, and studies
 
 StudyHive focuses on discovering people. Resources such as HITSZCS already help students find notes and past papers; the goal here is to help students find someone to learn or build with.
 
-## Core Features
+## Product Direction
 
 | Feature | Intended use |
 | --- | --- |
@@ -46,7 +46,41 @@ cd StudyHive
 git switch -c feature/study-groups-ui
 ```
 
-Runtime requirements, environment configuration, and install, run, test, build, and lint commands will be added with the application scaffold.
+### Run the frontend
+
+Use Node.js 22.12+ with npm. From this repository:
+
+```sh
+npm install
+npm run dev
+```
+
+Open the local URL printed by Vite, normally http://127.0.0.1:5173. No environment variables, credentials, or backend setup are needed.
+
+```sh
+npm run typecheck
+npm run lint
+npm run build
+npm run preview
+```
+
+Optional browser interaction tests:
+
+```sh
+npx playwright install chromium
+npm run test:ui
+```
+
+With an existing Chrome installation, PowerShell users can instead run:
+
+```powershell
+$env:PLAYWRIGHT_CHANNEL = "chrome"
+npm run test:ui
+```
+
+The demo uses four fictional students. Filters combine locally, Free Tonight uses sample availability, and study requests change React state only. Refreshing resets the demo. No one is contacted and no information is saved.
+
+See [frontend-contract.md](docs/frontend-contract.md) for display fields, components, future backend responsibilities, and test coverage.
 
 ## Team Ownership
 
@@ -68,9 +102,10 @@ The intended two-person split is:
 
 - [x] Initialize the repository.
 - [x] Document the product direction and contribution expectations.
-- [ ] Select the tech stack and scaffold the application.
-- [ ] Document architecture and technical decisions.
-- [ ] Implement Study Buddy and matching.
+- [x] Scaffold the frontend with React, TypeScript, Vite, and Tailwind CSS.
+- [x] Document frontend architecture and the backend handoff.
+- [x] Implement the Study Buddy UI with local filtering and a mock profile/request modal.
+- [ ] Implement real Study Buddy data and matching.
 - [ ] Implement Study Groups.
 - [ ] Implement project recruitment.
 - [ ] Implement Ask a Senior.
