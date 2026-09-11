@@ -121,3 +121,7 @@ The intended two-person split is:
 ## Backend prototype
 
 The supplied FastAPI registration/login code is now included in `backend/`. See [backend/README.md](backend/README.md) for Python setup, endpoint details, and existing prototype limitations. Backend ownership remains with the teammate.
+
+## My Profile UI
+
+After a successful login, select **Open my profile**, or use **My Profile** in the sidebar. Edit your description and picture URL, and choose up to three earned badges. Academic details are read-only. Login identity is kept in memory and clears on refresh. The supplied profile endpoints are now included in backend/main.py; see [frontend contract](docs/frontend-contract.md) for the attached backend's missing defaults and required fixes.

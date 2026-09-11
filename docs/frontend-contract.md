@@ -21,7 +21,7 @@ Agree on these interfaces before replacing fixtures; no backend contract is impl
 
 The current display model includes ID, name, major, year of study, course label, lookingFor description, personality tags, quote, bio, study goal, preferred study place, and an illustration variant. UI-only illustration fields need not be database columns. The lookingFor field is a short plain-text description of what the student wants to do with a buddy. Detailed recurring schedules and study-style categories are no longer displayed. Broad availability filters remain optional, demo-only controls. The backend owns real availability representation, date/time interpretation, filtering semantics, and validation.
 
-Study Groups, Projects, Ask a Senior, Requests management, and My Profile are visibly marked Soon and are not interactive navigation links. The modal's Send Study Request is a local prototype only and resets on refresh.
+Study Groups, Projects, Ask a Senior, and Requests management are visibly marked Soon and are not interactive navigation links. The modal's Send Study Request is a local prototype only and resets on refresh.
 
 ## Verification
 
@@ -40,8 +40,30 @@ Registration sends exactly full_name, student_id, password, email, major, degree
 - Master's uses master, years 1–3, and the thirteen supplied master majors.
 - Degree changes clear major and year selections. Exact sorted major names live in src/ui/data/registrationOptions.ts; these mirror the supplied API catalogue. GET /majors/{degree} is available on the backend but is not fetched by this version.
 - src/ui/auth/registrationApi.ts is a small frontend HTTP adapter. It handles HTTP errors, status: failed responses (including HTTP 200), unavailable servers, and unconfirmed success responses. A pending submission disables the form. Successful registration clears the form; it does not sign the user in.
-- No passwords or user records are stored in browser storage. Registration responses are not persisted. The frontend never calls /users/{user_id}.
+- No passwords or user records are stored in browser storage. Registration responses are not persisted. My Profile uses GET /users/{user_id} and explicitly selects public fields, discarding the password returned by the supplied backend.
 
 To connect, copy .env.example to .env.local, set VITE_API_BASE_URL to the teammate's API origin (for example http://127.0.0.1:8000), and restart Vite. Do not put secrets in VITE variables. The teammate owns the running API, validation, password handling, persistence and future sessions. The teammate-provided backend is included in backend/main.py with its original behavior; see backend/README.md for setup and prototype limitations. Both forms show explicit success or failure feedback. Login verifies credentials only: no session, protected routes or persistent signed-in state is created.
 
 Browser tests use intercepted API responses to verify payload types, success, rejection, HTTP errors and connection failure; they do not establish that a live backend is running.
+
+## My Profile integration
+
+My Profile is available from the sidebar or Open my profile after successful login. Only the returned user ID is kept in React memory; reload requires login again. This is UI identity state, not backend authorization.
+
+- GET /users/{user_id}: loads full_name, student_id, email, major, degree, grade, description, profile_picture, badges_earned and badges_displayed. GET currently omits id, so the known ID is used.
+- PATCH /profile/{user_id}: sends only description and profile_picture; expects status: success and a public user object.
+- GET /badges: badge ID to name/description catalogue.
+- PUT /profile/{user_id}/displayed-badges: sends {badge_ids: string[]}; expects badges_displayed. Only earned badges can be selected, up to three; empty selection is allowed.
+- No calls to the award-badge endpoint. Academic fields are read-only.
+- Pictures use URLs, with initials when empty or unavailable. There is no image upload/hosting subsystem.
+- Failed requests retain drafts and show errors. Only confirmed saves update the profile preview. Unknown optional profile fields are displayed as empty on new accounts.
+
+### Teammate work needed for the supplied profile API
+
+The supplied profile endpoints are now included in backend/main.py, with their original behavior preserved. The missing-field issue below still needs the backend teammate to fix.
+
+Initialize description and profile_picture to empty strings, and badges_earned and badges_displayed to empty lists when registering. Currently PATCH /profile and public_user access these missing keys directly, causing KeyError for new users. Missing-field defaults in the UI cannot fix backend saves.
+
+GET /users/{user_id} currently exposes password. Return public_user(user_id) instead, after fixing the defaults. The frontend allowlists fields but cannot prevent the server sending the raw password over the network. Add authenticated ownership checks and sessions in the backend; the in-memory frontend ID is not authorization.
+
+Profile UI tests intercept the expected responses; passing them does not mean the attached backend's missing-field issue is fixed.

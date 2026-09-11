@@ -5,3 +5,5 @@ import './ui/styles/global.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);
 
 import './ui/styles/auth.css';
+
+import './ui/styles/profile.css';

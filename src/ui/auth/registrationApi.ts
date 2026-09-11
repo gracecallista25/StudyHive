@@ -3,7 +3,7 @@ import type { LoginInput, RegisterInput } from '../../types/auth';
 export const registrationEnabled = Boolean(import.meta.env.VITE_API_BASE_URL?.trim());
 
 // UI transport only; FastAPI owns validation and accounts.
-async function submitAccount(endpoint: 'register' | 'login', input: LoginInput | RegisterInput): Promise<void> {
+async function submitAccount(endpoint: 'register' | 'login', input: LoginInput | RegisterInput): Promise<string> {
   const action = endpoint === 'register' ? 'registration' : 'login';
   const base = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '');
   if (!base) throw new Error('The backend is not connected yet.');
@@ -28,6 +28,7 @@ async function submitAccount(endpoint: 'register' | 'login', input: LoginInput |
   if (result?.status !== 'success' || typeof result.user_id !== 'string' || result.user?.id !== result.user_id) {
     throw new Error('The server did not confirm ' + action + '. Please try again.');
   }
+  return result.user_id;
 }
 
 export const registerAccount = (input: RegisterInput) => submitAccount('register', input);
