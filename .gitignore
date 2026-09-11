@@ -22,3 +22,8 @@ dist/
 playwright-report/
 test-results/
 .pnpm-store/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+.venv/

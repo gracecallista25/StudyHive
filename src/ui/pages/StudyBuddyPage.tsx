@@ -7,7 +7,7 @@ import { FilterBar } from '../filters/FilterBar';
 import { StudentCard } from '../students/StudentCard';
 import { StudentProfileModal } from '../students/StudentProfileModal';
 import { Button } from '../components/Button';
-const emptyFilters: StudentFilters = { course: '', availability: '', studyStyle: '', entryYear: '', major: '', freeTonight: false };
+const emptyFilters: StudentFilters = { course: '', availability: '', yearOfStudy: '', major: '', freeTonight: false };
 export function StudyBuddyPage() {
   const [filters, setFilters] = useState(emptyFilters);
   const [selected, setSelected] = useState<Student | null>(null);
@@ -16,8 +16,7 @@ export function StudyBuddyPage() {
   const visible = students.filter(s =>
     (!filters.course || s.course === filters.course) &&
     (!filters.availability || s.availability.some(a => a === filters.availability)) &&
-    (!filters.studyStyle || s.studyStyle === filters.studyStyle) &&
-    (!filters.entryYear || String(s.entryYear) === filters.entryYear) &&
+    (!filters.yearOfStudy || String(s.yearOfStudy) === filters.yearOfStudy) &&
     (!filters.major || s.major === filters.major) &&
     (!filters.freeTonight || s.freeTonight));
   const filtered = Object.values(filters).some(Boolean);

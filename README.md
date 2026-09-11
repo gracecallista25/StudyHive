@@ -3,7 +3,7 @@
 
 StudyHive is a planned desktop-first collaboration platform for HITSZ students. Finding a study partner or project teammate often means asking across group chats and personal networks. StudyHive aims to bring that search into one place, helping students find study partners, small groups, project teammates, and seniors with relevant course experience.
 
-**Current status: frontend demo.** A runnable React + TypeScript + Vite + Tailwind CSS Study Buddy page is available. It includes local filters, fictional student profiles, and a profile modal with demo-only request feedback. The other product areas and all backend functionality remain planned.
+**Current status: frontend demo with login and registration screens.** A runnable React + TypeScript + Vite + Tailwind CSS Study Buddy page is available. It includes local filters, fictional student profiles, and a profile modal with demo-only request feedback. Login uses student ID and password. Registration collects profile details and year of study. Registration can submit to the supplied FastAPI contract when an API URL is configured; otherwise it stays a preview. Login now calls POST /login when the API URL is configured and shows the returned outcome. Use Explore demo to open Study Buddy. The teammate-provided FastAPI prototype is in `backend/`; sessions and other product areas are not implemented in this frontend.
 
 ## Why StudyHive?
 
@@ -55,7 +55,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite, normally http://127.0.0.1:5173. No environment variables, credentials, or backend setup are needed.
+Open the local URL printed by Vite, normally http://127.0.0.1:5173. No backend setup is needed for the preview. To connect registration, copy `.env.example` to `.env.local`, set `VITE_API_BASE_URL` to your teammate’s API URL (for example `http://127.0.0.1:8000`), then restart Vite. Registration sends `grade` as a number and `degree` as `bachelor` or `master`. Login now calls POST /login when the API URL is configured and shows the returned outcome.
 
 ```sh
 npm run typecheck
@@ -117,3 +117,7 @@ The intended two-person split is:
 
 - **Product + UI / Frontend:** Graciella Callista Edwardson
 - **Backend / Core / Data:** Emil Aliyev
+
+## Backend prototype
+
+The supplied FastAPI registration/login code is now included in `backend/`. See [backend/README.md](backend/README.md) for Python setup, endpoint details, and existing prototype limitations. Backend ownership remains with the teammate.

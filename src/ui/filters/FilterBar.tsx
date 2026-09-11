@@ -1,4 +1,4 @@
-import { Search, Clock3, UsersRound, CalendarDays, BookOpen, ChevronDown } from 'lucide-react';
+import { Search, Clock3, CalendarDays, BookOpen, ChevronDown } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Student, StudentFilters } from '../../types/student';
 interface Props { filters: StudentFilters; onChange: (filters: StudentFilters) => void; students: Student[] }
@@ -12,8 +12,7 @@ export function FilterBar({ filters, onChange, students }: Props) {
     <div className="filter-selects">
       <Select label="Course" icon={Search} value={filters.course} options={options(students.map(s => s.course), 'All courses')} onChange={v => set('course', v)}/>
       <Select label="Availability" icon={Clock3} value={filters.availability} options={[{ value: '', label: 'Any time' }, { value: 'evenings', label: 'Evenings' }, { value: 'afternoons', label: 'Afternoons' }, { value: 'weekends', label: 'Weekends' }]} onChange={v => set('availability', v)}/>
-      <Select label="Study style" icon={UsersRound} value={filters.studyStyle} options={[{ value: '', label: 'Any style' }, { value: 'discussion', label: 'Discussion' }, { value: 'quiet', label: 'Individual focus' }, { value: 'practice', label: 'Practice together' }]} onChange={v => set('studyStyle', v)}/>
-      <Select label="Entry year" icon={CalendarDays} value={filters.entryYear} options={options(students.map(s => String(s.entryYear)).sort(), 'Any year')} onChange={v => set('entryYear', v)}/>
+      <Select label="Year of study" icon={CalendarDays} value={filters.yearOfStudy} options={[{ value: '', label: 'Any year' }, ...[...new Set(students.map(s => s.yearOfStudy))].sort((a,b) => a-b).map(y => ({ value: String(y), label: 'Year ' + y }))]} onChange={v => set('yearOfStudy', v)}/>
       <Select label="Major" icon={BookOpen} value={filters.major} options={options(students.map(s => s.major), 'Any major')} onChange={v => set('major', v)}/>
     </div>
     <div className="tonight-filter"><span className="filter-label">Free Tonight</span><button type="button" role="switch" aria-checked={filters.freeTonight} aria-label="Free Tonight" className="toggle" onClick={() => set('freeTonight', !filters.freeTonight)}><span/></button><p>Show students free tonight.<br/><span>Sample availability</span></p></div>

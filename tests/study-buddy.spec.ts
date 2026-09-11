@@ -1,8 +1,10 @@
 import { test, expect } from '@playwright/test';
 test('four profiles, local filters, empty state and reset', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#study-buddy');
   await expect(page.getByRole('heading', { name: 'Find your people.' })).toBeVisible();
   await expect(page.locator('.student-card')).toHaveCount(4);
+  await expect(page.getByLabel('Study style', { exact: true })).toHaveCount(0);
+  await expect(page.locator('.student-description')).toHaveCount(4);
   await page.getByLabel('Course', { exact: true }).selectOption('Operating Systems');
   await expect(page.locator('.student-card')).toHaveCount(1);
   await expect(page.getByText('1 student found', { exact: true })).toBeVisible();
@@ -16,13 +18,11 @@ test('four profiles, local filters, empty state and reset', async ({ page }) => 
   await page.getByLabel('Availability', { exact: true }).selectOption('afternoons');
   await expect(page.locator('.student-card')).toHaveCount(1);
   await page.getByRole('button', { name: 'Reset filters' }).click();
-  await page.getByLabel('Study style', { exact: true }).selectOption('discussion');
-  await expect(page.locator('.student-card')).toHaveCount(2);
-  await page.getByLabel('Entry year', { exact: true }).selectOption('2024');
+  await page.getByLabel('Year of study', { exact: true }).selectOption('1');
   await expect(page.locator('.student-card')).toHaveCount(1);
 });
 test('profile request state, keyboard close, focus return and session-only behavior', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#study-buddy');
   const view = page.getByRole('button', { name: 'View profile' }).first();
   await view.click();
   const dialog = page.getByRole('dialog');
@@ -47,7 +47,7 @@ test('profile request state, keyboard close, focus return and session-only behav
 test('desktop and mobile remain within viewport with usable modal', async ({ page }) => {
   for (const width of [1536, 1440, 390]) {
     await page.setViewportSize({ width, height: 1024 });
-    await page.goto('/');
+    await page.goto('/#study-buddy');
     await expect(page.locator('.student-card')).toHaveCount(4);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: 'test-results/studyhive-' + width + '.png', fullPage: true });
