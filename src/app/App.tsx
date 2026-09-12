@@ -6,7 +6,11 @@ import { ProfilePage } from '../features/profile/ProfilePage';
 import { LoginPage } from '../features/auth/LoginPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { HomePage } from '../features/home/HomePage';
+import { ConnectedStudyBuddy } from '../features/study-buddy/ConnectedStudyBuddy';
+import { studyBuddyConnected } from '../features/study-buddy/studyBuddyApi';
+import { StudyGroupsPage } from '../features/study-groups/StudyGroupsPage';
 function currentPage() {
+  if (window.location.hash === '#study-groups') return 'groups';
   if (window.location.hash === '#home') return 'home';
   if (window.location.hash === '#profile') return 'profile';
   if (window.location.hash === '#register') return 'register';
@@ -22,10 +26,11 @@ export default function App() {
     return () => window.removeEventListener('hashchange', navigate);
   }, []);
   useEffect(() => {
-    document.title = (page === 'home' ? 'Home' : page === 'profile' ? 'My Profile' : page === 'demo' ? 'Study Buddy' : page === 'register' ? 'Create account' : 'Log in') + ' · StudyHive';
+    document.title = (page === 'groups' ? 'Study Groups' : page === 'home' ? 'Home' : page === 'profile' ? 'My Profile' : page === 'demo' ? 'Study Buddy' : page === 'register' ? 'Create account' : 'Log in') + ' · StudyHive';
   }, [page]);
   if (page === 'home') return <main id="main-content" tabIndex={-1}><HomePage userId={userId}/></main>;
+  if (page === 'groups') return <AppLayout active="groups"><StudyGroupsPage userId={userId}/></AppLayout>;
   if (page === 'profile') return <AppLayout active="profile"><ProfilePage userId={userId}/></AppLayout>;
-  if (page === 'demo') return <AppLayout><div className="demo-banner"><span>Study Buddy demo · Fictional profiles</span><a href="#login">Back to login</a></div><StudyBuddyPage /></AppLayout>;
+  if (page === 'demo') return <AppLayout>{studyBuddyConnected ? <ConnectedStudyBuddy userId={userId}/> : <><div className="demo-banner"><span>Study Buddy demo · Fictional profiles</span><a href="#login">Back to login</a></div><StudyBuddyPage /></>}</AppLayout>;
   return <AuthLayout register={page === 'register'}>{page === 'register' ? <RegisterPage/> : <LoginPage onLogin={id => { setUserId(id); if (id) window.location.hash = 'home'; }}/>}</AuthLayout>;
 }

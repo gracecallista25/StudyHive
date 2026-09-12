@@ -15,8 +15,8 @@ test('student ID login validates, toggles passwords, and stays explicitly unconn
   await expect(page.getByRole('status')).toContainText('No sign-in was performed.');
   expect(await page.evaluate(() => localStorage.length)).toBe(0);
   await page.getByRole('link', { name: 'Explore demo' }).click();
-  await expect(page.getByRole('heading', { name: 'Find your people.' })).toBeVisible();
-  await expect(page.getByLabel('Year of study', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Find a Study Buddy', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Course', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Entry year', { exact: true })).toHaveCount(0);
   await page.getByRole('link', { name: 'Back to login' }).click();
   await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');

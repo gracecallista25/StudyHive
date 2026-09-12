@@ -9,7 +9,7 @@ const features = [
   { name: 'Study Buddy', description: 'Find students who want to study the same course or topic.', icon: Users, href: '#study-buddy' },
   { name: 'Ask a Senior', description: 'Get help from senior students who have already taken the course.', icon: GraduationCap },
   { name: 'Projects', description: 'Find teammates to work on projects, competitions, hackathons, or other ideas together.', icon: Lightbulb },
-  { name: 'Study Groups', description: 'Find, join, or create study groups.', icon: UsersRound },
+  { name: 'Study Groups', description: 'Find, join, or create study groups.', icon: UsersRound, href: '#study-groups' },
 ];
 // Presence is a dashboard fixture, independent of study availability.
 const onlineStudents = students;
@@ -50,8 +50,8 @@ export function HomePage({ userId }: { userId: string | null }) {
 
     <section className="home-features" aria-label="Explore StudyHive">
       {features.map(({ name: title, description, icon: Icon, href }) => {
-        const content = <><span className="home-feature-icon"><Icon size={26} aria-hidden="true"/></span><h2>{title}</h2><p>{description}</p><span className="home-feature-action">{href ? <>Find a study buddy <ArrowRight size={18} aria-hidden="true"/></> : 'Coming soon'}</span></>;
-        return href ? <a className="home-feature home-feature-primary" href={href} key={title}>{content}</a> : <article className="home-feature" key={title}>{content}</article>;
+        const content = <><span className="home-feature-icon"><Icon size={26} aria-hidden="true"/></span><h2>{title}</h2><p>{description}</p><span className="home-feature-action">{href ? <>{title === 'Study Groups' ? 'Find a study room' : 'Find a study buddy'} <ArrowRight size={18} aria-hidden="true"/></> : 'Coming soon'}</span></>;
+        return href ? <a className={'home-feature' + (title === 'Study Buddy' ? ' home-feature-primary' : '')} href={href} key={title}>{content}</a> : <article className="home-feature" key={title}>{content}</article>;
       })}
     </section>
 

@@ -21,7 +21,8 @@ async function login(page: Page) {
   await page.getByLabel('Student ID', { exact: true }).fill('test001');
   await page.getByLabel('Password', { exact: true }).fill('examplepass');
   await page.getByRole('button', { name: 'Log in', exact: true }).click();
-  await page.getByRole('link', { name: 'Open my profile' }).click();
+  await expect(page).toHaveURL(/#home$/);
+  await page.getByRole('link', { name: 'My Profile', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'A little more you.' })).toBeVisible();
   await expect(page.getByLabel('About you')).toHaveValue(user.description);
 }

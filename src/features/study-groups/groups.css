@@ -1,0 +1,23 @@
+.groups-page { max-width: 1440px; }
+.groups-page h1 { font-size: clamp(42px, 4vw, 64px); line-height: 1.08; margin: 18px 0; }
+.group-subtitle,.group-host,.group-state { color: var(--muted, #617069); }
+.group-toolbar,.group-card-top { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.group-toolbar { margin:28px 0 16px; }.group-toolbar h2 {font-size:20px;}
+.group-form { background:#edf1e5; border-radius:18px; padding:24px; }
+.group-form fieldset { border:0; padding:0; margin:0; display:grid; gap:16px; min-width:0; }
+.group-form label {display:grid; gap:8px; font-size:13px; font-weight:600;}
+.group-form input,.group-form select,.group-form textarea { width:100%; min-width:0; border:1px solid #dddccf; border-radius:9px; background:white; padding:12px; font:inherit; color:inherit; }
+.group-form small {font-weight:400; color:#617069;}.group-form .reset-link {margin-top:10px;}
+.group-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;}
+.group-card {background:white;border:1px solid #e2dfd4;border-radius:20px;padding:26px;overflow-wrap:anywhere;transition:border-color .2s;}.group-card:hover {border-color:#99ab91;}
+.group-card h2 {font-size:24px;margin:18px 0 6px;}.group-host {margin:0 0 18px;font-size:14px;}
+.group-icon {background:#edf1e5;border-radius:14px;padding:12px;display:flex;}.group-seats {font-size:14px;font-weight:600;}
+.group-capacity {height:5px;background:#edf1e5;border-radius:4px;overflow:hidden;}.group-capacity span {display:block;height:100%;background:#315c45;}
+.group-state {font-size:12px;margin:8px 0 20px;}.group-detail {display:flex;align-items:center;gap:10px;font-size:14px;}.group-detail svg {flex-shrink:0;}
+.group-notes {line-height:1.6;white-space:pre-wrap;}.group-card details {border-top:1px solid #eeece3;padding-top:16px;margin-top:20px;font-size:14px;}.group-card summary {cursor:pointer;}.group-card li {margin:8px 0;}
+.group-card-actions {display:flex;align-items:center;flex-wrap:wrap;gap:18px;margin-top:20px;font-size:13px;}
+.group-error,.group-feedback {padding:16px;border-radius:12px;}.group-error {background:#f8e9e2;color:#873e29;}.group-feedback {background:#edf1e5;}.group-result-count {margin:28px 0 16px;}.group-empty {padding:32px;border:1px dashed #b5bba9;border-radius:18px;}
+@media(max-width:800px){.group-grid{grid-template-columns:1fr;}.group-toolbar{flex-wrap:wrap;}}
+
+.group-search-details > summary { cursor:pointer; padding:14px 0; font-weight:600; }
+.group-feedback,.group-error { margin-bottom:16px; }

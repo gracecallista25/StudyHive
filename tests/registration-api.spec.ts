@@ -82,7 +82,9 @@ test('login reports API success, rejected credentials and connection failure', a
   await page.getByLabel('Student ID', { exact: true }).fill('demo123');
   await page.getByLabel('Password', { exact: true }).fill('samplepass');
   await page.getByRole('button', { name: 'Log in', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('Login successful.');
+  await expect(page).toHaveURL(/#home$/);
+  await page.getByRole('heading', { name: /Good morning|Good afternoon|Good evening/ }).waitFor();
+  await page.evaluate(() => { window.location.hash = 'login'; });
   await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
   await page.screenshot({ path: 'test-results/login-success.png', fullPage: true });
   await page.getByLabel('Student ID', { exact: true }).fill('demo123');

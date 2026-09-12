@@ -3,7 +3,7 @@
 
 StudyHive is a planned desktop-first collaboration platform for HITSZ students. Finding a study partner or project teammate often means asking across group chats and personal networks. StudyHive aims to bring that search into one place, helping students find study partners, small groups, project teammates, and seniors with relevant course experience.
 
-**Current status: frontend demo with login and registration screens.** A runnable React + TypeScript + Vite + Tailwind CSS Study Buddy page is available. It includes local filters, fictional student profiles, and a profile modal with demo-only request feedback. Login uses student ID and password. Registration collects profile details and year of study. Registration can submit to the supplied FastAPI contract when an API URL is configured; otherwise it stays a preview. Login now calls POST /login when the API URL is configured and shows the returned outcome. Use Explore demo to open Study Buddy. The teammate-provided FastAPI prototype is in `backend/`; sessions and other product areas are not implemented in this frontend.
+**Current status: runnable React + TypeScript frontend with API-connected login, registration, profile, Study Buddy, and Study Groups screens.** Set `VITE_API_BASE_URL` to your teammate's FastAPI server. Study Groups supports room search, creation with a chosen maximum membership, roster viewing, join requests, refresh, and host cancellation. The maximum includes the creator and is editable during creation only; the backend has no endpoint to edit it later. See [the rooms contract](docs/study-groups-api.md). Request management, Projects, and Ask a Senior remain for later. The separate fictional Study Buddy browser remains available for previews.
 
 ## Why StudyHive?
 

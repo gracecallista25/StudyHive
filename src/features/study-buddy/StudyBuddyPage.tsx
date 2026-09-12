@@ -1,34 +1,45 @@
-import { useState } from 'react';
-import { ArrowRight, SearchX } from 'lucide-react';
-import type { Student, StudentFilters } from './studentTypes';
-import { students } from './students';
+﻿import { useState } from 'react';
+import { ArrowLeft, ArrowRight, SearchX } from 'lucide-react';
 import { AcademicArt } from '../../shared/components/Artwork';
-import { FilterBar } from './FilterBar';
-import { StudentCard } from './StudentCard';
-import { StudentProfileModal } from './StudentProfileModal';
 import { Button } from '../../shared/components/Button';
-const emptyFilters: StudentFilters = { degree: '', course: '', availability: '', yearOfStudy: '', major: '', freeTonight: false };
-export function StudyBuddyPage() {
-  const [filters, setFilters] = useState(emptyFilters);
-  const [selected, setSelected] = useState<Student | null>(null);
+import { StudentAvatar } from './StudentAvatar';
+import { matchStudents } from './buddyData';
+import type { StudyMode } from './buddyData';
+import './studyBuddy.css';
+import { CoursePicker } from './CoursePicker';
+import { FocusedStudentCard } from './FocusedStudentCard';
+
+export function StudyBuddyPage({ initialCourse = '' }: { initialCourse?: string }) {
+  const [course, setCourse] = useState(initialCourse);
+  const [mode, setMode] = useState<StudyMode>('Either');
+  const [searching, setSearching] = useState(!initialCourse);
+  const [courseOnly, setCourseOnly] = useState(false);
+  const [index, setIndex] = useState(0);
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
-  // Local display filtering of four fixtures, not matching or backend availability logic.
-  const visible = students.filter(s =>
-    (!filters.course || s.course === filters.course) &&
-    (!filters.degree || s.degree === filters.degree) &&
-    (!filters.availability || s.availability.some(a => a === filters.availability)) &&
-    (!filters.yearOfStudy || String(s.yearOfStudy) === filters.yearOfStudy) &&
-    (!filters.major || s.major === filters.major) &&
-    (!filters.freeTonight || s.freeTonight));
-  const filtered = Object.values(filters).some(Boolean);
-  return <div className="page-content">
-    <header className="hero"><div className="hero-copy"><p className="breadcrumb">Campus <span>/</span><strong>Study Buddy</strong></p><h1>Find your people.</h1><p className="hero-subtitle">A good study session starts with the right company.</p></div><AcademicArt/></header>
-    <FilterBar filters={filters} onChange={setFilters} students={students}/>
-    <section className="profiles-section" aria-labelledby="profiles-title">
-      <div className="results-heading"><h2 id="profiles-title">Sample profiles</h2><div className="results-actions">{filtered && <button className="reset-link" onClick={() => setFilters(emptyFilters)}>Reset filters</button>}<p role="status" aria-live="polite">{visible.length} {visible.length === 1 ? 'student' : 'students'} found</p></div></div>
-      {visible.length ? <div className="student-grid">{visible.map(s => <StudentCard key={s.id} student={s} onView={() => setSelected(s)}/>)}</div> : <div className="empty-state"><SearchX size={34}/><h3>No study buddies found just yet.</h3><p>Try another course or loosen a filter to find your people.</p><Button onClick={() => setFilters(emptyFilters)}>Show all students <ArrowRight size={17}/></Button></div>}
-    </section>
+  const matches = matchStudents(course, mode, courseOnly);
+  const student = matches[index];
+  const available = matches.filter(person => person.availableToStudy).length;
+  function edit() { setSearching(true); setIndex(0); setCourseOnly(false); }
+  return <div className="page-content buddy-page">
+    <header className="hero"><div className="hero-copy"><p className="breadcrumb">Campus <span>/</span><strong>Study Buddy</strong></p><h1>Find a Study Buddy</h1><p className="hero-subtitle">{searching ? 'What are you studying today?' : 'A good study session starts with the right company.'}</p></div><AcademicArt/></header>
+    {searching ? <form className="buddy-start" onSubmit={event => { event.preventDefault(); if (!course) { const input = event.currentTarget.querySelector<HTMLInputElement>('#buddy-course'); input?.setCustomValidity('Choose a course from the list.'); input?.reportValidity(); return; } setIndex(0); setCourseOnly(false); setSearching(false); }}>
+      <CoursePicker value={course} onChange={setCourse}/>
+      <fieldset className="buddy-modes"><legend>Study Mode</legend>{(['Online', 'In person', 'Either'] as const).map(value => <label key={value}><input type="radio" name="study-mode" value={value} checked={mode === value} onChange={() => setMode(value)}/>{value}</label>)}</fieldset>
+      <Button type="submit">Find Study Buddies <ArrowRight size={17}/></Button>
+    </form> : <section aria-label="Study buddy results">
+      <div className="buddy-selection"><div><span>Studying:</span><strong>{course}</strong></div><div><span>Mode:</span><strong>{courseOnly ? 'Any mode (course only)' : mode}</strong></div><button className="reset-link" onClick={edit}>Change</button></div>
+      <p className="buddy-count">{available} {available === 1 ? 'student' : 'students'} available to study · {matches.length} {matches.length === 1 ? 'match' : 'matches'}</p>
+      {student ? <>
+        <FocusedStudentCard portrait={<StudentAvatar variant={student.avatar}/>} name={student.name} major={student.major} degree={student.degree} year={student.yearOfStudy} course={student.course} notes={student.lookingFor} mode={student.studyMode} presence={`${student.online ? 'Online now' : 'Currently offline'} · ${student.availableToStudy ? 'Available to study' : 'Not currently looking for a buddy'}`}/>
+        <p className="buddy-position" aria-live="polite">Student {index + 1} of {matches.length}: {student.name}</p>
+        <div className="buddy-actions"><Button disabled={index === 0} onClick={() => setIndex(index - 1)}><ArrowLeft size={16}/>Back</Button><Button disabled={sentIds.has(student.id)} onClick={() => setSentIds(current => new Set(current).add(student.id))}>{sentIds.has(student.id) ? 'Request sent' : 'Study Together'}</Button><Button disabled={index === matches.length - 1} onClick={() => setIndex(index + 1)}>Next<ArrowRight size={16}/></Button></div>
+        <p className="buddy-feedback" role="status">{sentIds.has(student.id) ? `Study request sent to ${student.name}.` : ''}</p>
+        <p className="buddy-note">Demo only: no request is delivered. Online means active on StudyHive; availability means looking for a study buddy.</p>
+      </> : <div className="empty-state"><SearchX size={32}/><h2>No study buddies found right now.</h2><div className="buddy-actions"><Button onClick={edit}>Change Course</Button><Button onClick={() => { setCourseOnly(true); setIndex(0); }}>Show Students From This Course</Button></div></div>}
+    </section>}
     <footer className="page-footer"><div className="footer-campus"><strong>HITSZ</strong><span>A CAMPUS OF CURIOUS MINDS.<br/>A LITTLE BETTER, TOGETHER.</span><i/></div><p>Keep learning.<br/><span>Keep growing.</span></p></footer>
-    {selected && <StudentProfileModal key={selected.id} student={selected} sent={sentIds.has(selected.id)} onSend={() => setSentIds(current => new Set(current).add(selected.id))} onClose={() => setSelected(null)}/>}
   </div>;
 }
+
+
+
