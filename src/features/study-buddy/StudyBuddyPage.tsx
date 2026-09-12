@@ -7,7 +7,7 @@ import { FilterBar } from './FilterBar';
 import { StudentCard } from './StudentCard';
 import { StudentProfileModal } from './StudentProfileModal';
 import { Button } from '../../shared/components/Button';
-const emptyFilters: StudentFilters = { course: '', availability: '', yearOfStudy: '', major: '', freeTonight: false };
+const emptyFilters: StudentFilters = { degree: '', course: '', availability: '', yearOfStudy: '', major: '', freeTonight: false };
 export function StudyBuddyPage() {
   const [filters, setFilters] = useState(emptyFilters);
   const [selected, setSelected] = useState<Student | null>(null);
@@ -15,6 +15,7 @@ export function StudyBuddyPage() {
   // Local display filtering of four fixtures, not matching or backend availability logic.
   const visible = students.filter(s =>
     (!filters.course || s.course === filters.course) &&
+    (!filters.degree || s.degree === filters.degree) &&
     (!filters.availability || s.availability.some(a => a === filters.availability)) &&
     (!filters.yearOfStudy || String(s.yearOfStudy) === filters.yearOfStudy) &&
     (!filters.major || s.major === filters.major) &&

@@ -9,7 +9,7 @@ test('four profiles, local filters, empty state and reset', async ({ page }) => 
   await page.getByLabel('Course', { exact: true }).selectOption('Operating Systems');
   await expect(page.locator('.student-card')).toHaveCount(1);
   await expect(page.getByText('1 student found', { exact: true })).toBeVisible();
-  await page.getByLabel('Major', { exact: true }).selectOption('Materials Science');
+  await page.getByLabel('Major', { exact: true }).selectOption('Chemistry');
   await expect(page.getByText('No study buddies found just yet.')).toBeVisible();
   await page.getByRole('button', { name: 'Show all students' }).click();
   await expect(page.locator('.student-card')).toHaveCount(4);
@@ -17,7 +17,7 @@ test('four profiles, local filters, empty state and reset', async ({ page }) => 
   await page.getByRole('switch', { name: 'Free Tonight' }).click();
   await expect(page.locator('.student-card')).toHaveCount(2);
   await expect(page.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
-  await page.getByLabel('Availability', { exact: true }).selectOption('afternoons');
+  await page.getByLabel('Time', { exact: true }).selectOption('13:00-15:00');
   await expect(page.locator('.student-card')).toHaveCount(1);
   await page.getByRole('button', { name: 'Reset filters' }).click();
   await page.getByLabel('Year of study', { exact: true }).selectOption('1');
@@ -62,4 +62,27 @@ test('required desktop sizes remain within viewport with usable modal', async ({
     await expect(page.getByRole('dialog')).toBeInViewport({ ratio: 1 });
     await page.getByRole('button', { name: 'Close profile' }).click();
   }
+});
+
+test('degree uses registration majors and years; time combines with filters', async ({ page }) => {
+  await page.goto('/#study-buddy');
+  await page.getByLabel('Degree', { exact: true }).selectOption('master');
+  await expect(page.locator('.student-card')).toHaveCount(2);
+  await expect(page.getByLabel('Major', { exact: true }).locator('option')).toHaveCount(14);
+  await expect(page.getByLabel('Year of study', { exact: true }).locator('option')).toHaveCount(4);
+  await page.getByLabel('Major', { exact: true }).selectOption('Electronic Engineering');
+  await page.getByLabel('Time', { exact: true }).selectOption('09:00-12:00');
+  await expect(page.locator('.student-card')).toHaveCount(1);
+  await expect(page.locator('.student-card')).toContainText('Maya Tan');
+  await expect(page.locator('.student-card')).toContainText("Master's");
+  await page.getByLabel('Degree', { exact: true }).selectOption('bachelor');
+  await expect(page.getByLabel('Major', { exact: true })).toHaveValue('');
+  await expect(page.getByLabel('Year of study', { exact: true })).toHaveValue('');
+  await expect(page.getByLabel('Major', { exact: true }).locator('option')).toHaveCount(9);
+  await expect(page.getByLabel('Year of study', { exact: true }).locator('option')).toHaveCount(6);
+  await expect(page.getByText('No study buddies found just yet.')).toBeVisible();
+  await page.getByRole('button', { name: 'Reset filters' }).click();
+  await expect(page.getByLabel('Degree', { exact: true })).toHaveValue('');
+  await expect(page.getByLabel('Time', { exact: true })).toHaveValue('');
+  await expect(page.locator('.student-card')).toHaveCount(4);
 });

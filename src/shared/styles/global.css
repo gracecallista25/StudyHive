@@ -51,7 +51,7 @@ h1 { font-family: var(--font-editorial); font-size: clamp(58px, 5.35vw, 87px); f
 .hero-subtitle { font-size: clamp(17px, 1.65vw, 25px); line-height: 1.5; color: #4f5865; margin: 0 0 0 14px; letter-spacing: -.5px; }
 .academic-art { position: absolute; right: 1px; top: -3px; width: 32%; max-width: 395px; height: 208px; }
 .filter-panel { display: flex; gap: 22px; padding: 24px 20px 19px; background: var(--color-sage); border-radius: 15px; min-height: 134px; }
-.filter-selects { display: grid; grid-template-columns: 1.2fr 1fr .85fr 1.2fr; gap: 20px; flex: 1; min-width: 0; align-items: start; }
+.filter-selects { display: grid; grid-template-columns: 1.2fr 1fr .9fr .85fr 1.2fr; gap: 20px; flex: 1; min-width: 0; align-items: start; }
 .filter-field { display: flex; flex-direction: column; gap: 9px; font-size: 14px; font-weight: 600; min-width: 0; }
 .select-wrap { position: relative; display: flex; align-items: center; background: #fff; border: 1px solid #dce0d5; border-radius: var(--control-radius); height: 43px; color: #34443e; }
 .select-wrap > svg:first-child { position: absolute; left: 11px; pointer-events: none; }
@@ -204,4 +204,9 @@ select { appearance: none; background: transparent; border: 0; width: 100%; heig
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Give the five Study Buddy filters readable widths on smaller desktops. */
+@media (min-width: 1101px) and (max-width: 1390px) {
+  .filter-selects { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 14px; }
 }

@@ -6,7 +6,6 @@ import { formErrors } from './formFeedback';
 import { loginAccount, registrationEnabled } from './authApi';
 import { Button } from '../../shared/components/Button';
 export function LoginPage({ onLogin }: { onLogin: (userId: string | null) => void }) {
-  const [verified, setVerified] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState('');
   const [failure, setFailure] = useState('');
@@ -17,7 +16,7 @@ export function LoginPage({ onLogin }: { onLogin: (userId: string | null) => voi
     if (submitting.current) return;
     const form = event.currentTarget;
     const next = formErrors(form);
-    setErrors(next); setFeedback(''); setFailure(''); setVerified(false); onLogin(null);
+    setErrors(next); setFeedback(''); setFailure(''); onLogin(null);
     if (Object.keys(next).length) return;
     if (!registrationEnabled) {
       setFeedback('Backend not connected. No sign-in was performed. Set VITE_API_BASE_URL and restart the frontend.');
@@ -27,9 +26,8 @@ export function LoginPage({ onLogin }: { onLogin: (userId: string | null) => voi
     submitting.current = true; setPending(true);
     try {
       const userId = await loginAccount({ student_id: String(values.get('student_id')).trim(), password: String(values.get('password')) });
-      onLogin(userId); setVerified(true);
       form.reset();
-      setFeedback('Login successful. Your student ID and password were verified.');
+      onLogin(userId);
     } catch (error) {
       setFailure(error instanceof Error ? error.message : 'Please try again.');
     } finally {
@@ -49,7 +47,6 @@ export function LoginPage({ onLogin }: { onLogin: (userId: string | null) => voi
       {failure && <p className="registration-message auth-feedback auth-feedback-error" role="alert"><strong>Login failed.</strong> {failure}</p>}
       {feedback && <p className="registration-message auth-feedback" role="status">{feedback}</p>}
     </form>
-    {verified && <a className="button profile-login-link" href="#profile">Open my profile <ArrowRight size={17}/></a>}
     <p className="auth-form-switch">First time here? <a href="#register">Create an account</a></p>
   </>;
 }

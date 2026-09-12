@@ -16,7 +16,7 @@ export function StudentProfileModal({ student: s, sent, onSend, onClose }: { stu
   }, []);
   return <dialog ref={dialog} className="profile-modal" aria-labelledby="profile-title" onCancel={e => { e.preventDefault(); onClose(); }} onClick={e => { if (e.target === dialog.current) { const rect = dialog.current.getBoundingClientRect(); if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) onClose(); } }}>
     <div className="modal-top"><span className="eyebrow">MEET YOUR STUDY BUDDY</span><button className="icon-button" aria-label="Close profile" onClick={onClose} autoFocus><X size={22}/></button></div>
-    <div className="modal-person"><StudentAvatar variant={s.avatar}/><div><h2 id="profile-title">{s.name}</h2><p>{s.major} · Year {s.yearOfStudy}</p><span className="course-badge"><BookOpen size={14}/>{s.course}</span></div></div>
+    <div className="modal-person"><StudentAvatar variant={s.avatar}/><div><h2 id="profile-title">{s.name}</h2><p>{s.major} · {s.degree === 'bachelor' ? "Bachelor's" : "Master's"} · Year {s.yearOfStudy}</p><span className="course-badge"><BookOpen size={14}/>{s.course}</span></div></div>
     <p className="modal-bio">{s.bio}</p>
     <div className="modal-facts"><div><h3>Looking for</h3><p>{s.lookingFor}</p></div></div>
     <div className="modal-goal"><h3>What I’m working on</h3><p>{s.studyGoal}</p><p className="place"><MapPin size={16}/>{s.preferredPlace}</p></div>
