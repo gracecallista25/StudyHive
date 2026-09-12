@@ -14,10 +14,13 @@ import { NotificationsPage } from '../features/notifications/NotificationsPage';
 
 import { ProjectsPage } from '../features/projects/ProjectsPage';
 
-type Page = 'projects' | 'notifications' | 'home' | 'groups' | 'profile' | 'register' | 'demo' | 'login';
+import { AskSeniorPage } from '../features/ask-senior/AskSeniorPage';
+
+type Page = 'senior' | 'projects' | 'notifications' | 'home' | 'groups' | 'profile' | 'register' | 'demo' | 'login';
 
 function getCurrentPage(): Page {
   switch (window.location.hash) {
+    case '#ask-senior': return 'senior';
     case '#projects': return 'projects';
     case '#notifications': return 'notifications';
     case '#study-groups': return 'groups';
@@ -31,6 +34,7 @@ function getCurrentPage(): Page {
 
 function getDocumentTitle(page: Page) {
   const titles: Record<Page, string> = {
+    senior: 'Ask a Senior',
     projects: 'Projects',
     notifications: 'Notifications',
     groups: 'Study Groups',
@@ -61,6 +65,7 @@ export default function App() {
   }, [page]);
 
   if (page === 'home') return <main id="main-content" tabIndex={-1}><HomePage userId={userId} /></main>;
+  if (page === 'senior') return <AppLayout active="senior"><AskSeniorPage /></AppLayout>;
   if (page === 'projects') return <AppLayout active="projects"><ProjectsPage /></AppLayout>;
   if (page === 'notifications') return <AppLayout active="notifications"><NotificationsPage /></AppLayout>;
   if (page === 'groups') return <AppLayout active="groups"><StudyGroupsPage userId={userId} /></AppLayout>;

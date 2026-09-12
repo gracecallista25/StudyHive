@@ -7,7 +7,7 @@ import './home.css';
 
 const features = [
   { name: 'Study Buddy', description: 'Find students who want to study the same course or topic.', icon: Users, href: '#study-buddy' },
-  { name: 'Ask a Senior', description: 'Get help from senior students who have already taken the course.', icon: GraduationCap },
+  { name: 'Ask a Senior', description: 'Get help from senior students who have already taken the course.', icon: GraduationCap, href: '#ask-senior' },
   { name: 'Projects', description: 'Find teammates to work on projects, competitions, hackathons, or other ideas together.', icon: Lightbulb, href: '#projects' },
   { name: 'Study Groups', description: 'Find, join, or create study groups.', icon: UsersRound, href: '#study-groups' },
 ];
@@ -78,7 +78,7 @@ export function HomePage({ userId }: { userId: string | null }) {
               <h2>{title}</h2>
               <p>{description}</p>
               <span className="home-feature-action">
-                {href ? <>{title === 'Study Groups' ? 'Find a study room' : title === 'Projects' ? 'Explore projects' : 'Find a study buddy'} <ArrowRight size={18} aria-hidden="true" /></> : 'Coming soon'}
+                {href ? <>{title === 'Study Groups' ? 'Find a study room' : title === 'Projects' ? 'Explore projects' : title === 'Ask a Senior' ? 'Meet the seniors' : 'Find a study buddy'} <ArrowRight size={18} aria-hidden="true" /></> : 'Coming soon'}
               </span>
             </>
           );

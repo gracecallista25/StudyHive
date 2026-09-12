@@ -2,13 +2,10 @@ import { Bell, GraduationCap, House, Lightbulb, MessageCircle, UserRound, Users,
 import type { LucideIcon } from 'lucide-react';
 import { CampusArt, LeafMark } from '../components/Artwork';
 
-type ActivePage = 'home' | 'buddy' | 'profile' | 'groups' | 'notifications' | 'projects';
+type ActivePage = 'home' | 'buddy' | 'profile' | 'groups' | 'notifications' | 'projects' | 'senior';
 
 const upcoming = [
-
-  { label: 'Ask a Senior', icon: GraduationCap },
-
-  { label: 'Messages', icon: MessageCircle },
+{ label: 'Messages', icon: MessageCircle },
 ];
 
 interface SidebarProps {
@@ -28,6 +25,7 @@ export function Sidebar({ active = 'buddy' }: SidebarProps) {
         <NavigationLink href="#study-buddy" label="Study Buddy" icon={Users} active={active === 'buddy'} />
         <NavigationLink href="#study-groups" label="Study Groups" icon={UsersRound} active={active === 'groups'} />
         <NavigationLink href="#projects" label="Projects" icon={Lightbulb} active={active === 'projects'} />
+        <NavigationLink href="#ask-senior" label="Ask a Senior" icon={GraduationCap} active={active === 'senior'} />
         {upcoming.map(({ label, icon: Icon }) => (
           <div key={label}>
             <span className="nav-item upcoming" aria-disabled="true" title={label + ' is planned for a later release'}><Icon size={23} /><span>{label}</span><span className="soon">Soon</span></span>
