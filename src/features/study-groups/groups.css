@@ -19,5 +19,4 @@
 .group-error,.group-feedback {padding:16px;border-radius:12px;}.group-error {background:#f8e9e2;color:#873e29;}.group-feedback {background:#edf1e5;}.group-result-count {margin:28px 0 16px;}.group-empty {padding:32px;border:1px dashed #b5bba9;border-radius:18px;}
 @media(max-width:800px){.group-grid{grid-template-columns:1fr;}.group-toolbar{flex-wrap:wrap;}}
 
-.group-search-details > summary { cursor:pointer; padding:14px 0; font-weight:600; }
 .group-feedback,.group-error { margin-bottom:16px; }

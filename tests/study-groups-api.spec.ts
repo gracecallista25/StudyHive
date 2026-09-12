@@ -15,7 +15,8 @@ test('room filters, join failure and retry, roster and desktop layout', async ({
     expect(query).toEqual({ course: 'Calculus', major: 'Computer Science', date: '2026-10-20', start_time: '09:00', end_time: '12:00', location: 'Library', viewer_id: 'viewer' });
     return route.fulfill({ json: { status: 'success', groups: [room] } });
   });
-  await page.getByLabel('Course', { exact: true }).fill('Calculus');
+  await page.getByLabel('Course', { exact: true }).fill('Calc');
+  await page.getByRole('option', { name: 'Calculus', exact: true }).click();
   await page.getByLabel('Major', { exact: true }).selectOption('Computer Science');
   await page.getByLabel('Date', { exact: true }).fill('2026-10-20');
   await page.getByLabel('Start time').fill('09:00');
@@ -55,7 +56,8 @@ test('create editable capacity, refresh full state and cancel own room', async (
     expect(route.request().postDataJSON()).toEqual({ user_id: 'owner', course: 'Calculus', date: '2026-10-20', start_time: '09:00', end_time: '12:00', location: 'Library', notes: '', max_members: 5 });
     return route.fulfill({ json: { status: 'success', group_id: 'g1', group: room } });
   });
-  await page.getByLabel('Course or topic').fill('Calculus');
+  await page.getByLabel('Course', { exact: true }).fill('Calc');
+  await page.getByRole('option', { name: 'Calculus', exact: true }).click();
   await page.getByLabel('Maximum members').fill('5');
   await page.getByLabel('Date', { exact: true }).fill('2026-10-20');
   await page.getByLabel('Start time').fill('09:00');
@@ -73,6 +75,10 @@ test('create editable capacity, refresh full state and cancel own room', async (
 });
 test('empty and offline states do not show fictional rooms', async ({ page }) => {
   await page.goto('/#study-groups');
+  await page.getByLabel('Course', { exact: true }).fill('Calc');
+  await page.getByRole('option', { name: 'Calculus', exact: true }).click();
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await expect(page.getByLabel('Course', { exact: true })).toHaveValue('');
   await page.route('**/study-groups?*', route => route.abort());
   await page.getByRole('button', { name: 'Find rooms', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Could not reach');

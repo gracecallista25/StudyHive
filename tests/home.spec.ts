@@ -5,7 +5,7 @@ test('Home connects existing navigation and expands online students without stud
   await expect(page).toHaveTitle('Home · StudyHive');
   await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(0);
   await expect(page.getByText('What do you want to do today?')).toBeVisible();
-  await expect(page.getByText('Coming soon', { exact: true })).toHaveCount(2);
+  await expect(page.getByText('Coming soon', { exact: true })).toHaveCount(1);
   await expect(page.getByRole('combobox')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Your Activity' })).toBeVisible();
   await page.getByRole('button', { name: 'View all' }).click();

@@ -1,5 +1,8 @@
 export type Degree = 'bachelor' | 'master';
-export interface LoginInput { student_id: string; password: string }
+export interface LoginInput {
+  student_id: string;
+  password: string;
+}
 export interface RegisterInput extends LoginInput {
   full_name: string;
   email: string;

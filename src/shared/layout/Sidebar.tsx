@@ -1,21 +1,42 @@
-import { House, Users, UsersRound, Lightbulb, GraduationCap, ClipboardList, UserRound } from 'lucide-react';
+import { Bell, GraduationCap, House, Lightbulb, MessageCircle, UserRound, Users, UsersRound } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { CampusArt, LeafMark } from '../components/Artwork';
+
+type ActivePage = 'home' | 'buddy' | 'profile' | 'groups' | 'notifications' | 'projects';
+
 const upcoming = [
-  { label: 'Projects', icon: Lightbulb },
-  { label: 'Ask a Senior', icon: GraduationCap }, { label: 'Requests', icon: ClipboardList },
+
+  { label: 'Ask a Senior', icon: GraduationCap },
+
+  { label: 'Messages', icon: MessageCircle },
 ];
-export function Sidebar({ active = 'buddy' }: { active?: 'home' | 'buddy' | 'profile' | 'groups' }) {
-  return <aside className="sidebar">
-    <div className="brand"><LeafMark/><div><span className="brand-name">StudyHive</span><p>HITSZ · Shenzhen</p></div></div>
-    <nav aria-label="Main navigation">
-      <a className={'nav-item' + (active === 'home' ? ' active' : '')} href="#home" aria-current={active === 'home' ? 'page' : undefined}><House size={23}/><span>Home</span></a>
-      <a className={"nav-item" + (active === "buddy" ? " active" : "")} href="#study-buddy" aria-current={active === "buddy" ? "page" : undefined}><Users size={23}/><span>Study Buddy</span></a>
-      <a className={'nav-item' + (active === 'groups' ? ' active' : '')} href="#study-groups" aria-current={active === 'groups' ? 'page' : undefined}><UsersRound size={23}/><span>Study Groups</span></a>
-      {upcoming.map(({ label, icon: Icon }, index) => <div className={index === 2 ? 'nav-divider' : ''} key={label}>
-        <span className="nav-item upcoming" aria-disabled="true" title={label + ' is planned for a later release'}><Icon size={23}/><span>{label}</span><span className="soon">Soon</span></span>
-      </div>)}
-      <a className={"nav-item" + (active === "profile" ? " active" : "")} href="#profile" aria-current={active === "profile" ? "page" : undefined}><UserRound size={23}/><span>My Profile</span></a>
-    </nav>
-    <div className="sidebar-bottom"><CampusArt/><p>Same campus.<br/>Brighter together.</p></div>
-  </aside>;
+
+interface SidebarProps {
+  active?: ActivePage;
+}
+
+function NavigationLink({ href, label, icon: Icon, active = false }: { href: string; label: string; icon: LucideIcon; active?: boolean }) {
+  return <a className={'nav-item' + (active ? ' active' : '')} href={href} aria-current={active ? 'page' : undefined}><Icon size={23} /><span>{label}</span></a>;
+}
+
+export function Sidebar({ active = 'buddy' }: SidebarProps) {
+  return (
+    <aside className="sidebar">
+      <div className="brand"><LeafMark /><div><span className="brand-name">StudyHive</span><p>HITSZ · Shenzhen</p></div></div>
+      <nav aria-label="Main navigation">
+        <NavigationLink href="#home" label="Home" icon={House} active={active === 'home'} />
+        <NavigationLink href="#study-buddy" label="Study Buddy" icon={Users} active={active === 'buddy'} />
+        <NavigationLink href="#study-groups" label="Study Groups" icon={UsersRound} active={active === 'groups'} />
+        <NavigationLink href="#projects" label="Projects" icon={Lightbulb} active={active === 'projects'} />
+        {upcoming.map(({ label, icon: Icon }) => (
+          <div key={label}>
+            <span className="nav-item upcoming" aria-disabled="true" title={label + ' is planned for a later release'}><Icon size={23} /><span>{label}</span><span className="soon">Soon</span></span>
+          </div>
+        ))}
+        <div className="nav-divider"><NavigationLink href="#notifications" label="Notifications" icon={Bell} active={active === 'notifications'} /></div>
+        <NavigationLink href="#profile" label="My Profile" icon={UserRound} active={active === 'profile'} />
+      </nav>
+      <div className="sidebar-bottom"><CampusArt /><p>Same campus.<br />Brighter together.</p></div>
+    </aside>
+  );
 }
