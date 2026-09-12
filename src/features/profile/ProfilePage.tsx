@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Award, ArrowRight, BookOpen, Check, Leaf, LockKeyhole, RefreshCw } from 'lucide-react';
-import type { BadgeCatalogue, Profile } from '../../types/profile';
-import { Button } from '../components/Button';
-import { loadBadges, loadProfile, saveDisplayedBadges, saveProfile } from '../profile/profileApi';
-import { ProfilePortrait } from '../profile/ProfilePortrait';
-import { safePicture } from '../profile/pictureUrl';
+import type { BadgeCatalogue, Profile } from './profileTypes';
+import { Button } from '../../shared/components/Button';
+import { loadBadges, loadProfile, saveDisplayedBadges, saveProfile } from './profileApi';
+import { ProfilePortrait } from './ProfilePortrait';
+import { safePicture } from './pictureUrl';
 
 export function ProfilePage({ userId }: { userId: string | null }) {
   const [user, setUser] = useState<Profile | null>(null);

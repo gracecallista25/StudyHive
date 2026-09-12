@@ -1,6 +1,6 @@
 import { Search, Clock3, CalendarDays, BookOpen, ChevronDown } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { Student, StudentFilters } from '../../types/student';
+import type { Student, StudentFilters } from './studentTypes';
 interface Props { filters: StudentFilters; onChange: (filters: StudentFilters) => void; students: Student[] }
 function Select({ label, icon: Icon, value, options, onChange }: { label: string; icon: LucideIcon; value: string; options: { value: string; label: string }[]; onChange: (value: string) => void }) {
   return <label className="filter-field"><span>{label}</span><span className="select-wrap"><Icon size={18}/><select value={value} onChange={e => onChange(e.target.value)} aria-label={label}>{options.map(o => <option value={o.value} key={o.value}>{o.label}</option>)}</select><ChevronDown size={15}/></span></label>;

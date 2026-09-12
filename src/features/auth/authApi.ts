@@ -1,4 +1,4 @@
-import type { LoginInput, RegisterInput } from '../../types/auth';
+import type { LoginInput, RegisterInput } from './authTypes';
 
 export const registrationEnabled = Boolean(import.meta.env.VITE_API_BASE_URL?.trim());
 

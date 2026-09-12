@@ -1,4 +1,4 @@
-import type { BadgeCatalogue, Profile, ProfileUpdate } from '../../types/profile';
+import type { BadgeCatalogue, Profile, ProfileUpdate } from './profileTypes';
 
 async function request(path: string, method = 'GET', body?: unknown) {
   const base = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '');

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { ArrowRight, SearchX } from 'lucide-react';
-import type { Student, StudentFilters } from '../../types/student';
-import { students } from '../data/students';
-import { AcademicArt } from '../components/Artwork';
-import { FilterBar } from '../filters/FilterBar';
-import { StudentCard } from '../students/StudentCard';
-import { StudentProfileModal } from '../students/StudentProfileModal';
-import { Button } from '../components/Button';
+import type { Student, StudentFilters } from './studentTypes';
+import { students } from './students';
+import { AcademicArt } from '../../shared/components/Artwork';
+import { FilterBar } from './FilterBar';
+import { StudentCard } from './StudentCard';
+import { StudentProfileModal } from './StudentProfileModal';
+import { Button } from '../../shared/components/Button';
 const emptyFilters: StudentFilters = { course: '', availability: '', yearOfStudy: '', major: '', freeTonight: false };
 export function StudyBuddyPage() {
   const [filters, setFilters] = useState(emptyFilters);

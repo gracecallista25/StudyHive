@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { AppLayout } from './ui/layout/AppLayout';
-import { AuthLayout } from './ui/layout/AuthLayout';
-import { StudyBuddyPage } from './ui/pages/StudyBuddyPage';
-import { ProfilePage } from './ui/pages/ProfilePage';
-import { LoginPage } from './ui/pages/LoginPage';
-import { RegisterPage } from './ui/pages/RegisterPage';
+import { AppLayout } from '../shared/layout/AppLayout';
+import { AuthLayout } from '../shared/layout/AuthLayout';
+import { StudyBuddyPage } from '../features/study-buddy/StudyBuddyPage';
+import { ProfilePage } from '../features/profile/ProfilePage';
+import { LoginPage } from '../features/auth/LoginPage';
+import { RegisterPage } from '../features/auth/RegisterPage';
 function currentPage() {
   if (window.location.hash === '#profile') return 'profile';
   if (window.location.hash === '#register') return 'register';

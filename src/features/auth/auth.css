@@ -100,3 +100,30 @@
 .registration-message { margin-top: 18px; }
 
 .auth-feedback-error { background: #fff0eb; border-left-color: #ab493b; color: #87362d; }
+
+/* Keep auth actions visible on the 1366 x 768 desktop target. */
+@media (min-width: 851px) and (max-height: 800px) {
+  .auth-main { padding: 20px 40px 16px; }
+  .auth-content, .auth-register .auth-content { padding: 18px 0; }
+  .auth-form-heading, .auth-register .auth-form-heading { margin-bottom: 12px; }
+  .auth-eyebrow { margin-bottom: 8px; }
+  .auth-form-heading h2, .auth-register .auth-form-heading h2 { font-size: 36px; margin-bottom: 9px; }
+  .auth-preview-note, .auth-register .auth-preview-note { padding: 9px 12px; margin-bottom: 14px; }
+  .auth-form, .register-form { gap: 12px 20px; }
+  .auth-field > label { margin-bottom: 6px; }
+  .auth-control input, .auth-control select { height: 42px; }
+  .auth-chevron { top: 13px; }
+  .password-toggle { top: 2px; }
+  .auth-submit { min-height: 42px; margin-top: 2px; }
+  .auth-form-switch { margin-top: 16px; }
+  .auth-footer { padding-top: 12px; }
+  .auth-story { padding: 26px 40px 20px; }
+  .auth-story-content { padding: 20px 0 12px; }
+  .auth-story h1 { font-size: 48px; }
+  .auth-story-description { margin: 18px 0 22px; }
+  .auth-art-wrap { max-width: 270px; padding: 18px 12px 10px; }
+  .auth-story-notes { margin-top: 18px; }
+  .auth-story-bottom { margin-top: 12px; }
+  .auth-story-bottom > svg { height: 65px; }
+}
+

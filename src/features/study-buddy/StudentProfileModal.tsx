@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { X, ArrowUpRight, Check, MapPin, BookOpen } from 'lucide-react';
-import type { Student } from '../../types/student';
-import { StudentAvatar } from '../components/StudentAvatar';
-import { Badge } from '../components/Badge';
-import { Button } from '../components/Button';
+import type { Student } from './studentTypes';
+import { StudentAvatar } from './StudentAvatar';
+import { Badge } from '../../shared/components/Badge';
+import { Button } from '../../shared/components/Button';
 export function StudentProfileModal({ student: s, sent, onSend, onClose }: { student: Student; sent: boolean; onSend: () => void; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {

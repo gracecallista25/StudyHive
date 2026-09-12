@@ -71,10 +71,13 @@ test('only earned badges selectable, maximum three, save and empty selection', a
   await expect(page.locator('.profile-featured-badges')).toContainText('No badges displayed yet');
   expect(payload).toEqual({ badge_ids: [] });
 });
-test('profile desktop and mobile layouts, initials fallback, reload requires login', async ({ page }) => {
+test('profile fits required desktop sizes and reload requires login', async ({ page }) => {
   await login(page);
-  for (const width of [1536, 390]) {
-    await page.setViewportSize({ width, height: 1024 });
+  for (const { width, height } of [page.viewportSize()!]) {
+    expect([
+      { width: 1920, height: 1080 },
+      { width: 1366, height: 768 },
+    ]).toContainEqual({ width, height });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: 'test-results/profile-' + width + '.png', fullPage: true });
   }

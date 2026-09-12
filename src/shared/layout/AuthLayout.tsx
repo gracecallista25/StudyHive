@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { ArrowUpRight, BookOpen, UsersRound, Sparkles } from 'lucide-react';
 import { AcademicArt, CampusArt, LeafMark } from '../components/Artwork';
-import { StudentAvatar } from '../components/StudentAvatar';
+import { StudentAvatar } from '../../features/study-buddy/StudentAvatar';
 export function AuthLayout({ children, register = false }: { children: ReactNode; register?: boolean }) {
   return <div className={'auth-shell' + (register ? ' auth-register' : '')}>
     <aside className="auth-story" aria-label="Welcome to StudyHive">

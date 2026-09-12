@@ -1,4 +1,4 @@
-import type { Degree } from '../../types/auth';
+import type { Degree } from './authTypes';
 // Exact choices from the teammate's FastAPI registration contract.
 export const degreeOptions = [
   { value: 'bachelor', label: "Bachelor's" },

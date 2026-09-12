@@ -1,4 +1,4 @@
-import type { Student } from '../../types/student';
+import type { Student } from './studentTypes';
 export const students: Student[] = [
   {
     id: 'lin', name: 'Lin Chen', major: 'Computer Science', yearOfStudy: 3,

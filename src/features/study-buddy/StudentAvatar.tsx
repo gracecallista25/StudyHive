@@ -1,4 +1,4 @@
-import type { Student } from '../../types/student';
+import type { Student } from './studentTypes';
 const palette = {
   lin: { background: '#d6e6de', shirt: '#477762', hair: '#26372f', skin: '#e5b999' },
   maya: { background: '#f3e5c5', shirt: '#dfc88e', hair: '#533e2f', skin: '#f0cbaa' },

@@ -45,12 +45,16 @@ test('registration fields, validation and no account creation', async ({ page })
   await page.reload();
   await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
 });
-test('auth screens fit desktop and mobile', async ({ page }) => {
-  for (const width of [1536, 390]) {
-    await page.setViewportSize({ width, height: 1024 });
+test('auth screens fit required desktop sizes', async ({ page }) => {
+  for (const { width, height } of [page.viewportSize()!]) {
+    expect([
+      { width: 1920, height: 1080 },
+      { width: 1366, height: 768 },
+    ]).toContainEqual({ width, height });
     for (const route of ['login', 'register']) {
       await page.goto('/#' + route);
       await expect(page.getByLabel('Student ID', { exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: route === 'login' ? 'Log in' : 'Create account', exact: true })).toBeInViewport({ ratio: 1 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.screenshot({ path: 'test-results/' + route + '-' + width + '.png', fullPage: true });
     }

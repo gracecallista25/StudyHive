@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { ArrowRight, Info } from 'lucide-react';
-import { FormField } from '../auth/FormField';
-import { formErrors } from '../auth/formFeedback';
-import { loginAccount, registrationEnabled } from '../auth/registrationApi';
-import { Button } from '../components/Button';
+import { FormField } from './FormField';
+import { formErrors } from './formFeedback';
+import { loginAccount, registrationEnabled } from './authApi';
+import { Button } from '../../shared/components/Button';
 export function LoginPage({ onLogin }: { onLogin: (userId: string | null) => void }) {
   const [verified, setVerified] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});

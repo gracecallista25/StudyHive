@@ -1,8 +1,8 @@
 import { ArrowRight, BookOpen, Tags } from 'lucide-react';
-import type { Student } from '../../types/student';
-import { StudentAvatar } from '../components/StudentAvatar';
-import { Badge } from '../components/Badge';
-import { Button } from '../components/Button';
+import type { Student } from './studentTypes';
+import { StudentAvatar } from './StudentAvatar';
+import { Badge } from '../../shared/components/Badge';
+import { Button } from '../../shared/components/Button';
 export function StudentCard({ student: s, onView }: { student: Student; onView: () => void }) {
   return <article className="student-card">
     <StudentAvatar variant={s.avatar}/>

@@ -125,3 +125,7 @@ The supplied FastAPI registration/login code is now included in `backend/`. See 
 ## My Profile UI
 
 After a successful login, select **Open my profile**, or use **My Profile** in the sidebar. Edit your description and picture URL, and choose up to three earned badges. Academic details are read-only. Login identity is kept in memory and clears on refresh. The supplied profile endpoints are now included in backend/main.py; see [frontend contract](docs/frontend-contract.md) for the attached backend's missing defaults and required fixes.
+
+## Desktop display targets
+
+The frontend is tested at browser viewports of **1920 x 1080** and **1366 x 768** CSS pixels (100% browser zoom). Playwright runs every browser test at both sizes. Login and registration primary buttons are checked for full visibility on the initial screen; Study Buddy and Profile allow normal vertical scrolling, with no horizontal page overflow. Existing small-screen CSS remains as a fallback, but mobile is not an acceptance target.
