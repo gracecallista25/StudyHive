@@ -83,10 +83,13 @@ test('login reports API success, rejected credentials and connection failure', a
   await page.getByLabel('Password', { exact: true }).fill('samplepass');
   await page.getByRole('button', { name: 'Log in', exact: true }).click();
   await expect(page).toHaveURL(/#home$/);
+  await expect(page.getByRole('navigation', { name: 'Account navigation' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(0);
   await page.getByRole('heading', { name: /Good morning|Good afternoon|Good evening/ }).waitFor();
   await page.evaluate(() => { window.location.hash = 'login'; });
   await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
   await page.screenshot({ path: 'test-results/login-success.png', fullPage: true });
+  await page.goto('/#login');
   await page.getByLabel('Student ID', { exact: true }).fill('demo123');
   await page.getByLabel('Password', { exact: true }).fill('samplepass');
   await page.getByRole('button', { name: 'Log in', exact: true }).click();
