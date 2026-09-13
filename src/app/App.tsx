@@ -16,10 +16,12 @@ import { ProjectsPage } from '../features/projects/ProjectsPage';
 
 import { AskSeniorPage } from '../features/ask-senior/AskSeniorPage';
 
-type Page = 'senior' | 'projects' | 'notifications' | 'home' | 'groups' | 'profile' | 'register' | 'demo' | 'login';
+import { MessagesPage } from '../features/messages/MessagesPage';
+type Page = 'messages' | 'senior' | 'projects' | 'notifications' | 'home' | 'groups' | 'profile' | 'register' | 'demo' | 'login';
 
 function getCurrentPage(): Page {
   switch (window.location.hash) {
+    case '#messages': return 'messages';
     case '#ask-senior': return 'senior';
     case '#projects': return 'projects';
     case '#notifications': return 'notifications';
@@ -34,6 +36,7 @@ function getCurrentPage(): Page {
 
 function getDocumentTitle(page: Page) {
   const titles: Record<Page, string> = {
+    messages: 'Messages',
     senior: 'Ask a Senior',
     projects: 'Projects',
     notifications: 'Notifications',
@@ -65,6 +68,7 @@ export default function App() {
   }, [page]);
 
   if (page === 'home') return <main id="main-content" tabIndex={-1}><HomePage userId={userId} /></main>;
+  if (page === 'messages') return <AppLayout active="messages"><MessagesPage /></AppLayout>;
   if (page === 'senior') return <AppLayout active="senior"><AskSeniorPage /></AppLayout>;
   if (page === 'projects') return <AppLayout active="projects"><ProjectsPage /></AppLayout>;
   if (page === 'notifications') return <AppLayout active="notifications"><NotificationsPage /></AppLayout>;
@@ -80,3 +84,4 @@ export default function App() {
     </AuthLayout>
   );
 }
+

@@ -1,8 +1,11 @@
+import { UnreadChatBadge } from '../messages/UnreadChatBadge';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Bell, Check, GraduationCap, Lightbulb, MessageCircle, UserRound, Users, UsersRound } from 'lucide-react';
 import { loadProfile } from '../profile/profileApi';
 import { StudentAvatar } from '../study-buddy/StudentAvatar';
 import { students } from '../study-buddy/students';
+import { LeafMark } from '../../shared/components/Artwork';
+import campusBackground from './hitsz-campus.png';
 import './home.css';
 
 const features = [
@@ -54,11 +57,11 @@ export function HomePage({ userId }: { userId: string | null }) {
 
   return (
     <div className="page-content home-page">
-      <div className="home-account-bar">
-        <span className="home-brand">StudyHive</span>
-        <nav aria-label="Account navigation">
+      <div className="home-campus-hero"><img className="home-campus-background" src={campusBackground} alt="" fetchPriority="high" /><div className="home-account-bar">
+        <a href="#home" className="home-brand" aria-label="StudyHive home"><LeafMark /><span>StudyHive</span><small>HITSZ · Shenzhen</small></a>
+        <nav aria-label="Account navigation"><a href="#home" aria-current="page">Home</a>
           <a href="#notifications"><Bell size={19} aria-hidden="true" />Notifications</a>
-          <span aria-disabled="true" title="Messages are planned for a later release"><MessageCircle size={19} aria-hidden="true" />Messages <small>Soon</small></span>
+          <a href="#messages"><MessageCircle size={19} aria-hidden="true" />Messages <UnreadChatBadge /></a>
           <a href="#profile"><UserRound size={19} aria-hidden="true" />My Profile</a>
         </nav>
       </div>
@@ -68,7 +71,7 @@ export function HomePage({ userId }: { userId: string | null }) {
         <h1>{greeting}{name ? `, ${name}` : ''}!</h1>
         <p className="home-subtitle">What do you want to do today?</p>
         {userId && profileFailed && <p className="home-note" role="status">Your name could not be loaded. You can still explore the dashboard.</p>}
-      </header>
+      </header></div>
 
       <section className="home-features" aria-label="Explore StudyHive">
         {features.map(({ name: title, description, icon: Icon, href }) => {
@@ -92,7 +95,7 @@ export function HomePage({ userId }: { userId: string | null }) {
           <div className="home-panel-heading"><h2 id="home-online-title">Students Online</h2><span className="home-sample">Sample data</span></div>
           <p className="home-online-count"><span aria-hidden="true" />{onlineStudents.length} students online</p>
           <div className="home-online-preview">
-            <div className="home-avatar-stack">{onlineStudents.slice(0, 3).map(student => <span key={student.id} title={student.name}><StudentAvatar variant={student.avatar} /></span>)}</div>
+            <div className="home-avatar-stack">{onlineStudents.slice(0, 4).map(student => <span key={student.id} title={student.name}><StudentAvatar variant={student.avatar} /></span>)}</div>
             <button className="reset-link" aria-expanded={showAll} aria-controls="home-online-list" onClick={toggleOnlineStudents}>{showAll ? 'Show less' : 'View all'}</button>
           </div>
           <p className="home-note">Active on StudyHive, not necessarily available to study.</p>
@@ -108,3 +111,6 @@ export function HomePage({ userId }: { userId: string | null }) {
     </div>
   );
 }
+
+
+

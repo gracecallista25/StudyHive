@@ -1,7 +1,7 @@
 import type { MouseEvent, ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 
-type ActivePage = 'home' | 'buddy' | 'profile' | 'groups' | 'notifications' | 'projects' | 'senior';
+type ActivePage = 'home' | 'buddy' | 'profile' | 'groups' | 'notifications' | 'projects' | 'senior' | 'messages';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -24,3 +24,4 @@ export function AppLayout({ children, active = 'buddy' }: AppLayoutProps) {
     </>
   );
 }
+
