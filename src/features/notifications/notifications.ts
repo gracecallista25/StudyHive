@@ -1,4 +1,4 @@
-import type { Student } from '../study-buddy/studentTypes';
+import type { Student } from '../study-buddy/studyBuddy';
 
 export interface Notification {
   id: string;
@@ -23,3 +23,6 @@ export const initialNotifications: Notification[] = [
   { id: 'yuna', title: 'Yuna Park joined your study group', context: 'Calculus · Study Groups', time: '4:20 pm', day: 'Yesterday', unread: false, kind: 'update', name: 'Yuna Park', avatar: 'yuna', description: 'Engineering · Year 2', message: 'Your group has a new member. A little company makes a lot of progress.' },
   { id: 'welcome', title: 'Welcome to your StudyHive inbox', context: 'Your campus connections, in one place', time: '10:00 am', day: 'Yesterday', unread: false, kind: 'update', name: 'StudyHive', avatar: 'lin', description: 'HITSZ · Shenzhen', message: 'This is where study requests and group updates will appear. These examples let you try the inbox before the backend is connected.' },
 ];
+
+
+

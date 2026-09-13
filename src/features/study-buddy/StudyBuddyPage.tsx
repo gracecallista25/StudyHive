@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight, SearchX } from 'lucide-react';
-import { AcademicArt } from '../../shared/components/Artwork';
-import { Button } from '../../shared/components/Button';
-import { CoursePicker } from './CoursePicker';
-import { FocusedStudentCard } from './FocusedStudentCard';
-import { StudentAvatar } from './StudentAvatar';
-import { matchStudents } from './buddyData';
-import type { StudyMode } from './buddyData';
+import { AcademicArt } from '../../shared/components';
+import { Button } from '../../shared/components';
+import { CoursePicker, FocusedStudentCard } from './StudyBuddyComponents';
+import { StudentAvatar } from '../../shared/components';
+import { matchStudents } from './studyBuddy';
+import type { StudyMode } from './studyBuddy';
 import './studyBuddy.css';
 
 export function StudyBuddyPage({ initialCourse = '' }: { initialCourse?: string }) {
@@ -132,3 +131,6 @@ export function StudyBuddyPage({ initialCourse = '' }: { initialCourse?: string 
     </div>
   );
 }
+
+
+

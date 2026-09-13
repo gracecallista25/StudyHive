@@ -1,17 +1,12 @@
 import { useRef, useState } from 'react';
 import { GraduationCap, Search, UsersRound } from 'lucide-react';
-import { Button } from '../../shared/components/Button';
-import { AcademicArt } from '../../shared/components/Artwork';
-import { SeniorCard } from './SeniorCard';
-import { SeniorProfile } from './SeniorProfile';
-import { SeniorApplicationForm } from './SeniorApplicationForm';
-import type { SeniorApplication } from './SeniorApplicationForm';
-import { seniors } from './seniorData';
-import type { SeniorQuestion } from './seniorData';
+import { Button } from '../../shared/components';
+import { AcademicArt } from '../../shared/components';
+import { SeniorApplicationForm, SeniorCard, SeniorProfile } from './SeniorComponents';
+import type { SeniorApplication } from './seniors';
+import { seniorCourses, seniorMajors, seniorMatchesFilters, seniors } from './seniors';
+import type { SeniorQuestion } from './seniors';
 import './askSenior.css';
-
-const courses = [...new Set(seniors.flatMap(senior => senior.courses))].sort();
-const majors = [...new Set(seniors.map(senior => senior.major))].sort();
 
 export function AskSeniorPage() {
   const [search, setSearch] = useState('');
@@ -26,13 +21,7 @@ export function AskSeniorPage() {
   const pageRef = useRef<HTMLDivElement>(null);
 
   const selected = seniors.find(senior => senior.id === selectedId);
-  const visibleSeniors = seniors.filter(senior => {
-    const searchableText = [senior.name, senior.major, senior.summary, ...senior.tags, ...senior.topics.map(topic => topic.title)].join(' ').toLowerCase();
-    return searchableText.includes(search.trim().toLowerCase())
-      && (!course || senior.courses.includes(course))
-      && (!major || senior.major === major)
-      && (!availableOnly || senior.available);
-  });
+  const visibleSeniors = seniors.filter(senior => seniorMatchesFilters(senior, search, course, major, availableOnly));
 
   function openSenior(id: string, ask = false) {
     setSelectedId(id);
@@ -94,8 +83,8 @@ export function AskSeniorPage() {
           </header>
           <div className="seniors-filters" role="search" aria-label="Find a senior">
             <div className="senior-search"><Search size={20} aria-hidden="true" /><input type="search" aria-label="Search seniors" placeholder="Search seniors by name, topic or keyword…" value={search} onChange={event => setSearch(event.target.value)} /></div>
-            <label>Course<select aria-label="Course" value={course} onChange={event => setCourse(event.target.value)}><option value="">All courses</option>{courses.map(item => <option key={item}>{item}</option>)}</select></label>
-            <label>Major<select aria-label="Major" value={major} onChange={event => setMajor(event.target.value)}><option value="">All majors</option>{majors.map(item => <option key={item}>{item}</option>)}</select></label>
+            <label>Course<select aria-label="Course" value={course} onChange={event => setCourse(event.target.value)}><option value="">All courses</option>{seniorCourses.map(item => <option key={item}>{item}</option>)}</select></label>
+            <label>Major<select aria-label="Major" value={major} onChange={event => setMajor(event.target.value)}><option value="">All majors</option>{seniorMajors.map(item => <option key={item}>{item}</option>)}</select></label>
             <label className="senior-available-filter">Available to help<span><input type="checkbox" checked={availableOnly} onChange={event => setAvailableOnly(event.target.checked)} /><span className="senior-switch" aria-hidden="true" /><span>Show only available</span></span></label>
           </div>
           <div className="seniors-results-heading">
@@ -112,3 +101,5 @@ export function AskSeniorPage() {
     </div>
   );
 }
+
+

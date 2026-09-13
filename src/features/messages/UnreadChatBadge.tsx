@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { readConversations, storageKey } from './messageData';
+import { readConversations, storageKey } from './messages';
 import './unreadChatBadge.css';
 
 export function UnreadChatBadge() {
@@ -18,3 +18,5 @@ export function UnreadChatBadge() {
   }, []);
   return count > 0 ? <span className="unread-chat-badge" aria-label={`${count} unopened ${count === 1 ? 'chat' : 'chats'}`} aria-live="polite">{count > 99 ? '99+' : count}</span> : null;
 }
+
+

@@ -1,15 +1,13 @@
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { AcademicArt } from '../../shared/components/Artwork';
-import { Button } from '../../shared/components/Button';
+import { AcademicArt } from '../../shared/components';
+import { Button } from '../../shared/components';
+import { StudentAvatar } from '../../shared/components';
 import { ProfilePortrait } from '../profile/ProfilePortrait';
-import { CoursePicker } from './CoursePicker';
-import { FocusedStudentCard } from './FocusedStudentCard';
-import { StudyBuddyPage } from './StudyBuddyPage';
-import { ListingSearchFields } from './ListingSearchFields';
-import { browseListings, createListing, sendStudyRequest } from './studyBuddyApi';
-import type { Listing, ListingSearchFilters } from './studyBuddyApi';
+import { CoursePicker, FocusedStudentCard, ListingSearchFields } from './StudyBuddyComponents';
+import { exampleListings, type SearchListing, browseListings, createListing, sendStudyRequest } from './studyBuddy';
+import type { ListingSearchFilters } from './studyBuddy';
 import './studyBuddy.css';
 
 const emptyListingFilters: ListingSearchFilters = {
@@ -25,9 +23,9 @@ type Screen = 'search' | 'results' | 'create';
 export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
   const [filters, setFilters] = useState<ListingSearchFilters>(emptyListingFilters);
   const [course, setCourse] = useState('');
-  const [examples, setExamples] = useState(false);
+
   const [screen, setScreen] = useState<Screen>('search');
-  const [listings, setListings] = useState<Listing[]>([]);
+  const [listings, setListings] = useState<SearchListing[]>([]);
   const [index, setIndex] = useState(0);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
@@ -68,7 +66,8 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
     setError('');
     setNotice('');
     try {
-      setListings(await browseListings(course, userId, filters));
+      const realListings = await browseListings(course, userId, filters);
+      setListings([...realListings, ...exampleListings(course, filters)]);
       setIndex(0);
       setScreen('results');
     } catch (requestError) {
@@ -81,6 +80,10 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
 
   async function send() {
     if (!current || busy.current || sent.has(current.id)) return;
+    if (current.example) {
+      setSent(ids => new Set(ids).add(current.id));
+      return;
+    }
     if (!userId) {
       setError('Log in before sending a study request.');
       return;
@@ -155,24 +158,8 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
     setError('');
   }
 
-  if (examples) {
-    return (
-      <>
-        <div className="demo-banner">
-          <span>Example students · Fictional profiles and simulated requests</span>
-          <button className="reset-link" onClick={() => setExamples(false)}>Back to real listings</button>
-        </div>
-        <StudyBuddyPage initialCourse={course} />
-      </>
-    );
-  }
-
   return (
     <div className="page-content buddy-page">
-      <div className="demo-banner">
-        <span>Want to try it? Browse 30 example students across all 13 courses.</span>
-        <button className="reset-link" disabled={pending} onClick={() => setExamples(true)}>Browse example students</button>
-      </div>
       <header className="hero">
         <div className="hero-copy">
           <p className="breadcrumb">Campus <span>/</span><strong>Study Buddy</strong></p>
@@ -226,30 +213,30 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
             <button className="reset-link" disabled={pending} onClick={() => changeScreen('search')}>Change</button>
             <button className="reset-link" disabled={pending} onClick={() => void search()}>Refresh</button>
           </div>
-          <p className="buddy-count">{listings.length} open study {listings.length === 1 ? 'listing' : 'listings'}</p>
+          <p className="buddy-count">{listings.filter(item => !item.example).length} open study listings · {listings.filter(item => item.example).length} example profiles</p>
 
           {current ? (
             <>
               <FocusedStudentCard
-                portrait={<ProfilePortrait name={current.created_by.full_name} source={current.created_by.profile_picture} />}
+                portrait={current.example ? <StudentAvatar variant={current.example.avatar} /> : <ProfilePortrait name={current.created_by.full_name} source={current.created_by.profile_picture} />}
                 name={current.created_by.full_name}
                 major={current.created_by.major}
                 degree={current.created_by.degree}
                 year={current.created_by.grade}
                 course={current.course}
                 notes={current.notes || ''}
-                presence="Open study listing"
+                presence={current.example ? 'Example profile · Simulated request' : 'Open study listing'}
                 date={current.date}
-                time={`${current.start_time}–${current.end_time}`}
+                time={current.example ? current.example.time : `${current.start_time}–${current.end_time}`} mode={current.example?.mode}
                 location={current.location}
               />
               <p className="buddy-position" aria-live="polite">Listing {index + 1} of {listings.length}: {current.created_by.full_name}</p>
               <div className="buddy-actions">
                 <Button disabled={pending || index === 0} onClick={moveToPrevious}><ArrowLeft size={16} />Back</Button>
-                <Button disabled={pending || !userId || sent.has(current.id)} onClick={() => void send()}>{sent.has(current.id) ? 'Request sent' : pending ? 'Please wait…' : 'Study Together'}</Button>
+                <Button disabled={pending || (!current.example && !userId) || sent.has(current.id)} onClick={() => void send()}>{sent.has(current.id) ? (current.example ? 'Example request sent' : 'Request sent') : pending ? 'Please wait…' : (current.example ? 'Try Study Together' : 'Study Together')}</Button>
                 <Button disabled={pending || index === listings.length - 1} onClick={moveToNext}>Next<ArrowRight size={16} /></Button>
               </div>
-              <p role="status" className="buddy-feedback">{sent.has(current.id) ? `Study request sent to ${current.created_by.full_name}.` : ''}</p>
+              <p role="status" className="buddy-feedback">{sent.has(current.id) ? (current.example ? `Example request simulated for ${current.created_by.full_name}. No real request was sent.` : `Study request sent to ${current.created_by.full_name}.`) : ''}</p>
             </>
           ) : (
             <div className="empty-state">
@@ -269,3 +256,8 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
     </div>
   );
 }
+
+
+
+
+

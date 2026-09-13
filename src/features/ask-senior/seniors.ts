@@ -1,4 +1,4 @@
-import type { Student } from '../study-buddy/studentTypes';
+import type { Student } from '../study-buddy/studyBuddy';
 
 export interface Senior {
   id: string;
@@ -121,3 +121,25 @@ export const seniors: Senior[] = [
     suggestions: [],
   },
 ];
+export interface SeniorApplication {
+  name: string;
+  major: string;
+  year: string;
+  courses: string;
+  topics: string;
+  experience: string;
+  availability: string;
+}
+
+export const seniorCourses = [...new Set(seniors.flatMap(senior => senior.courses))].sort();
+export const seniorMajors = [...new Set(seniors.map(senior => senior.major))].sort();
+
+export function seniorMatchesFilters(senior: Senior, search: string, course: string, major: string, availableOnly: boolean) {
+  const searchableText = [senior.name, senior.major, senior.summary, ...senior.tags, ...senior.topics.map(topic => topic.title)].join(' ').toLowerCase();
+  return searchableText.includes(search.trim().toLowerCase())
+    && (!course || senior.courses.includes(course))
+    && (!major || senior.major === major)
+    && (!availableOnly || senior.available);
+}
+
+

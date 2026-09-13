@@ -39,3 +39,19 @@ export function readConversations(): Conversation[] {
     return valid ? value as Conversation[] : initialConversations;
   } catch { return initialConversations; }
 }
+
+
+export function saveConversations(conversations: Conversation[]) {
+  localStorage.setItem(storageKey, JSON.stringify(conversations));
+}
+
+export function filterConversations(conversations: Conversation[], filter: string, query: string) {
+  const normalizedQuery = query.trim().toLowerCase();
+  return conversations.filter(conversation =>
+    (filter === 'all' || conversation.kind === filter) && conversation.name.toLowerCase().includes(normalizedQuery),
+  );
+}
+
+export function countUnreadConversations(conversations: Conversation[]) {
+  return conversations.filter(conversation => conversation.unread > 0).length;
+}

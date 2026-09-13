@@ -1,16 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, ChevronRight, Download, FileText, Info, MessageCircle, Paperclip, Pin, Search, Send, SquarePen, UsersRound, X } from 'lucide-react';
-import { StudentAvatar } from '../study-buddy/StudentAvatar';
-import { people, readConversations, storageKey, type ChatFile, type Conversation } from './messageData';
+import { ArrowLeft, ArrowRight, Check, ChevronRight, FileText, Info, MessageCircle, Paperclip, Pin, Search, Send, SquarePen, X } from 'lucide-react';
+import { StudentAvatar } from '../../shared/components';
+import { countUnreadConversations, filterConversations, people, readConversations, saveConversations, type ChatFile, type Conversation } from './messages';
+import { ChatAvatar, FileLink } from './MessageComponents';
 import './messages.css';
-
-function ChatAvatar({ chat }: { chat: Conversation }) {
-  const person = people.find(p => p.id === chat.members[0]);
-  return chat.kind === 'group' || !person ? <span className="msg-group-avatar"><UsersRound size={23} /></span> : <StudentAvatar variant={person.avatar} />;
-}
-function FileLink({ file }: { file: ChatFile }) {
-  return <a className="msg-file" href={file.url} download={file.name}><span className="msg-file-icon"><FileText size={21} /></span><span><strong>{file.name}</strong><small>{file.size}</small></span><Download size={17} aria-label="Download" /></a>;
-}
 
 export function MessagesPage() {
   const [chats, setChats] = useState(readConversations);
@@ -35,12 +28,12 @@ export function MessagesPage() {
   const chat = chats.find(c => c.id === activeId) || chats[0];
   const draft = drafts[chat.id] || '';
   const attachment = attachments[chat.id];
-  const visible = chats.filter(c => (filter === 'all' || c.kind === filter) && c.name.toLowerCase().includes(query.trim().toLowerCase()));
+  const visible = filterConversations(chats, filter, query);
   const sharedFiles = chat.messages.flatMap(m => m.file ? [m.file] : []);
   useEffect(() => {
-    try { localStorage.setItem(storageKey, JSON.stringify(chats)); setSaveError(''); }
+    try { saveConversations(chats); setSaveError(''); }
     catch { setSaveError('Browser storage is full or unavailable. New messages will only last for this visit.'); }
-    window.dispatchEvent(new CustomEvent('studyhive:unread-chats', { detail: chats.filter(c => c.unread > 0).length }));
+    window.dispatchEvent(new CustomEvent('studyhive:unread-chats', { detail: countUnreadConversations(chats) }));
   }, [chats]);
   useEffect(() => { messageEnd.current?.scrollIntoView({ block: 'nearest' }); }, [chat.id, chat.messages.length]);
 
@@ -109,5 +102,8 @@ export function MessagesPage() {
     <dialog className="msg-dialog" ref={dialog}><form onSubmit={e => { e.preventDefault(); createChat(); }}><div className="msg-details-heading"><h2>Start a conversation</h2><button className="msg-icon" type="button" aria-label="Close new message" onClick={() => dialog.current?.close()}><X size={20} /></button></div><p>Bring a classmate into the conversation.</p><div className="msg-filters">{['personal', 'group'].map(k => <button key={k} type="button" aria-pressed={newKind === k} onClick={() => { setNewKind(k); setSelectedPeople([]); }}>{k === 'personal' ? 'Personal chat' : 'Group chat'}</button>)}</div>{newKind === 'group' && <label className="msg-name-label">Group name<input value={newName} onChange={e => setNewName(e.target.value)} maxLength={60} placeholder="e.g. Friday Study Circle" required /></label>}<fieldset><legend>{newKind === 'group' ? 'Choose members' : 'Choose a classmate'}</legend>{people.map(p => <label key={p.id}><StudentAvatar variant={p.avatar} /><span><strong>{p.name}</strong><small>{p.detail}</small></span><input type={newKind === 'personal' ? 'radio' : 'checkbox'} name="recipient" checked={selectedPeople.includes(p.id)} onChange={() => setSelectedPeople(previous => newKind === 'personal' ? [p.id] : previous.includes(p.id) ? previous.filter(id => id !== p.id) : [...previous, p.id])} /></label>)}</fieldset><p className="msg-detail-note">Creates a local preview conversation. No invitations are sent.</p><button className="button msg-create" disabled={!selectedPeople.length || (newKind === 'group' && !newName.trim())}>{newKind === 'group' ? 'Create group' : 'Open conversation'}<ArrowRight size={17} /></button></form></dialog>
   </section>;
 }
+
+
+
 
 

@@ -1,10 +1,8 @@
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { ArrowRight, Info } from 'lucide-react';
-import { Button } from '../../shared/components/Button';
-import { FormField } from './FormField';
-import { formErrors } from './formFeedback';
-import { loginAccount, registrationEnabled } from './authApi';
+import { Button } from '../../shared/components';
+import { FormField, formErrors, loginAccount, registrationEnabled } from './auth';
 
 export function LoginPage({ onLogin }: { onLogin: (userId: string | null) => void }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -81,3 +79,6 @@ export function LoginPage({ onLogin }: { onLogin: (userId: string | null) => voi
     </>
   );
 }
+
+
+

@@ -1,4 +1,4 @@
-import type { Student } from '../study-buddy/studentTypes';
+import type { Student } from '../study-buddy/studyBuddy';
 
 export type ProjectArt = 'connect' | 'planner' | 'leaf' | 'code';
 
@@ -109,3 +109,15 @@ export const initialProjects: Project[] = [
     team: [{ name: 'Lin Chen', role: 'Project lead', avatar: 'lin' }],
   },
 ];
+export function getProjectSkills(projects: Project[]) {
+  return [...new Set(projects.flatMap(project => project.roles.flatMap(role => role.skills)))].sort();
+}
+
+export function projectMatchesFilters(project: Project, search: string, skill: string, type: string, openOnly: boolean) {
+  const searchableText = `${project.title} ${project.summary}`.toLowerCase();
+  const matchesSearch = searchableText.includes(search.trim().toLowerCase());
+  const matchesSkill = !skill || project.roles.some(role => role.skills.includes(skill));
+  return matchesSearch && matchesSkill && (!type || project.type === type) && (!openOnly || project.roles.length > 0);
+}
+
+

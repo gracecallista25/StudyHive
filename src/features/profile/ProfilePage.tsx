@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Award, ArrowRight, BookOpen, Check, Leaf, LockKeyhole, RefreshCw } from 'lucide-react';
-import { Button } from '../../shared/components/Button';
+import { Button } from '../../shared/components';
 import { ProfilePortrait } from './ProfilePortrait';
-import { loadBadges, loadProfile, saveDisplayedBadges, saveProfile } from './profileApi';
-import type { BadgeCatalogue, Profile } from './profileTypes';
-import { safePicture } from './pictureUrl';
+import { loadBadges, loadProfile, saveDisplayedBadges, saveProfile } from './profile';
+import type { BadgeCatalogue, Profile } from './profile';
+import { safePicture } from './profile';
 
 type SaveTarget = 'profile' | 'badges' | '';
 
@@ -229,3 +229,6 @@ export function ProfilePage({ userId }: { userId: string | null }) {
     </section>
   );
 }
+
+
+

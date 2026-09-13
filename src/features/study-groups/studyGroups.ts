@@ -29,6 +29,32 @@ export interface NewGroup {
   max_members: number;
 }
 
+export interface StudyGroupFilters {
+  major: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  location: string;
+}
+
+export const emptyStudyGroupFilters: StudyGroupFilters = {
+  major: '',
+  date: '',
+  start_time: '',
+  end_time: '',
+  location: '',
+};
+
+export function hasInvalidTimeRange(filters: Pick<StudyGroupFilters, 'start_time' | 'end_time'>) {
+  const onlyOneTimeProvided = Boolean(filters.start_time) !== Boolean(filters.end_time);
+  const endBeforeStart = Boolean(filters.start_time) && filters.start_time >= filters.end_time;
+  return onlyOneTimeProvided || endBeforeStart;
+}
+
+export function getFormValue(form: FormData, key: string) {
+  return String(form.get(key) ?? '').trim();
+}
+
 async function request(path: string, method = 'GET', body?: unknown) {
   const base = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '');
   if (!base) {
@@ -118,3 +144,4 @@ export async function joinGroup(id: string, userId: string) {
 export async function cancelGroup(id: string, userId: string) {
   await request('/study-groups/' + encodeURIComponent(id) + '?user_id=' + encodeURIComponent(userId), 'DELETE');
 }
+

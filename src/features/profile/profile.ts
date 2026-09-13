@@ -1,4 +1,21 @@
-import type { BadgeCatalogue, Profile, ProfileUpdate } from './profileTypes';
+export interface Profile {
+  id: string;
+  full_name: string;
+  student_id: string;
+  email: string;
+  major: string;
+  degree: string;
+  grade: number;
+  description: string;
+  profile_picture: string;
+  badges_earned: string[];
+  badges_displayed: string[];
+}
+export interface ProfileUpdate { description: string; profile_picture: string }
+export interface ProfileBadge { name: string; description: string }
+export type BadgeCatalogue = Record<string, ProfileBadge>;
+
+
 
 async function request(path: string, method = 'GET', body?: unknown) {
   const base = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '');
@@ -50,3 +67,11 @@ export async function saveDisplayedBadges(id: string, badge_ids: string[]) {
   if (!Array.isArray(data.badges_displayed) || data.badges_displayed.some((id: unknown) => typeof id !== 'string')) throw new Error('The backend did not confirm your badge selection.');
   return data.badges_displayed as string[];
 }
+
+export function safePicture(value: string) {
+  if (/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=\s]+$/i.test(value)) return value;
+  try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; }
+  catch { return ''; }
+}
+
+

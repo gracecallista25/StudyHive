@@ -1,12 +1,9 @@
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { ArrowRight, Info } from 'lucide-react';
-import { Button } from '../../shared/components/Button';
-import type { Degree, RegisterInput } from './authTypes';
-import { FormField } from './FormField';
-import { formErrors } from './formFeedback';
-import { registerAccount, registrationEnabled } from './authApi';
-import { degreeOptions, majorsByDegree, maxYearByDegree } from './registrationOptions';
+import { Button } from '../../shared/components';
+import type { Degree, RegisterInput } from './auth';
+import { FormField, formErrors, registerAccount, registrationEnabled, degreeOptions, majorsByDegree, maxYearByDegree } from './auth';
 
 export function RegisterPage() {
   const [degree, setDegree] = useState<Degree | ''>('');
@@ -109,3 +106,6 @@ export function RegisterPage() {
     </>
   );
 }
+
+
+

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
+
 const person = { id: 'owner', full_name: 'Alex Chen', major: 'Computer Science', degree: 'bachelor', grade: 2, profile_picture: '' };
 const listing = { id: 'listing-1', course: 'Data Structures', date: '2026-10-20', start_time: '19:00', end_time: '20:00', location: 'Library', notes: 'Practice graphs.', status: 'open', created_by: person };
 async function login(page: Page) {
@@ -17,22 +18,20 @@ async function search(page: Page) {
   await page.getByRole('option', { name: 'Data Structures', exact: true }).click();
   await page.getByRole('button', { name: 'Find Study Buddies' }).click();
 }
-test('example students are accessible without sending backend requests', async ({ page }) => {
-  let apiCalls = 0;
-  await page.route('**/study-buddy**', route => {
-    if (route.request().resourceType() === 'fetch') { apiCalls++; return route.abort(); }
-    return route.continue();
-  });
+test('examples appear in normal results and simulate requests without backend writes', async ({ page }) => {
+  let writes = 0;
+  await page.route('**/study-buddy?*', route => route.fulfill({ json: { status: 'success', listings: [] } }));
+  await page.route('**/study-buddy/*/request', route => { writes++; return route.abort(); });
   await page.goto('/#study-buddy');
+  await expect(page.getByRole('button', { name: 'Browse example students' })).toHaveCount(0);
   await page.getByLabel('Course', { exact: true }).fill('Calculus');
   await page.getByRole('option', { name: 'Calculus', exact: true }).click();
-  await page.getByRole('button', { name: 'Browse example students' }).click();
+  await page.getByRole('button', { name: 'Find Study Buddies' }).click();
   await expect(page.locator('.student-card')).toContainText('Ava Liu');
-  await page.getByRole('button', { name: 'Study Together' }).click();
-  await expect(page.getByRole('status')).toContainText('Study request sent to Ava Liu.');
-  expect(apiCalls).toBe(0);
-  await page.getByRole('button', { name: 'Back to real listings' }).click();
-  await expect(page.getByLabel('Course', { exact: true })).toHaveValue('Calculus');
+  await expect(page.locator('.student-card')).toContainText('Example profile');
+  await page.getByRole('button', { name: 'Try Study Together' }).click();
+  await expect(page.getByRole('status')).toContainText('No real request was sent');
+  expect(writes).toBe(0);
 });
 test('loads listings and sends exact request with rejection and retry', async ({ page }) => {
   await page.route('**/study-buddy?*', route => {
@@ -46,7 +45,7 @@ test('loads listings and sends exact request with rejection and retry', async ({
     return route.fulfill({ json: calls === 1 ? { status: 'failed', reason: 'This listing is no longer open' } : { status: 'success', request_id: 'request-1' } });
   });
   await login(page); await search(page);
-  await expect(page.locator('.buddy-count')).toHaveText('2 open study listings');
+  await expect(page.locator('.buddy-count')).toHaveText('2 open study listings · 3 example profiles');
   await expect(page.locator('.student-card')).toContainText('Alex Chen');
   await expect(page.locator('.student-card')).toContainText('19:00–20:00');
   await expect(page.getByText('Online now')).toHaveCount(0);
@@ -66,7 +65,7 @@ test('empty search can publish the exact listing payload', async ({ page }) => {
     expect(route.request().postDataJSON()).toEqual({ user_id: 'viewer', course: 'Data Structures', date: '2026-10-20', start_time: '19:00', end_time: '20:00', location: 'Library', notes: 'Practice graphs.' });
     return route.fulfill({ json: { status: 'success', listing_id: listing.id, listing } });
   });
-  await login(page); await search(page);
+  await login(page); await page.getByLabel('Date', { exact: true }).fill('2026-10-20'); await search(page);
   await expect(page.getByText('No study buddies found right now.')).toBeVisible();
   await page.getByRole('button', { name: 'Create a study listing' }).click();
   await page.getByLabel('Date', { exact: true }).fill('2026-10-20');
@@ -125,6 +124,9 @@ test('search requires a complete increasing time range before calling backend', 
   expect(calls).toBe(0);
   await page.getByLabel('End time', { exact: true }).fill('20:00');
   await page.getByRole('button', { name: 'Find Study Buddies' }).click();
-  await expect(page.getByText('No study buddies found right now.')).toBeVisible();
+  await expect(page.locator('.buddy-count')).toContainText('example profiles');
   expect(calls).toBe(1);
 });
+
+
+

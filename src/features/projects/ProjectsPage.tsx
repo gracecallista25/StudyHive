@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { FolderOpen, Plus, Search } from 'lucide-react';
-import { Button } from '../../shared/components/Button';
-import { ProjectCard } from './ProjectCard';
-import { ProjectDetail } from './ProjectDetail';
-import { CreateProjectForm } from './CreateProjectForm';
-import { initialProjects, projectTypes } from './projectData';
-import type { Project } from './projectData';
+import { Button } from '../../shared/components';
+import { CreateProjectForm, ProjectCard, ProjectDetail } from './ProjectComponents';
+import { getProjectSkills, initialProjects, projectMatchesFilters, projectTypes } from './projects';
+import type { Project } from './projects';
 import './projects.css';
 
 export function ProjectsPage() {
@@ -20,12 +18,8 @@ export function ProjectsPage() {
   const pageRef = useRef<HTMLDivElement>(null);
 
   const selected = projects.find(project => project.id === selectedId);
-  const skills = [...new Set(projects.flatMap(project => project.roles.flatMap(role => role.skills)))].sort();
-  const visibleProjects = projects.filter(project => {
-    const matchesSearch = `${project.title} ${project.summary}`.toLowerCase().includes(search.trim().toLowerCase());
-    const matchesSkill = !skill || project.roles.some(role => role.skills.includes(skill));
-    return matchesSearch && matchesSkill && (!type || project.type === type) && (!openOnly || project.roles.length > 0);
-  });
+  const skills = getProjectSkills(projects);
+  const visibleProjects = projects.filter(project => projectMatchesFilters(project, search, skill, type, openOnly));
 
   useEffect(() => {
     pageRef.current?.focus();
@@ -47,6 +41,22 @@ export function ProjectsPage() {
     setSkill('');
     setType('');
     setOpenOnly(true);
+  }
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+  }
+
+  function handleSkillChange(value: string) {
+    setSkill(value);
+  }
+
+  function handleTypeChange(value: string) {
+    setType(value);
+  }
+
+  function handleOpenOnlyChange(value: boolean) {
+    setOpenOnly(value);
   }
 
   return (
@@ -71,17 +81,17 @@ export function ProjectsPage() {
           <div className="projects-filters" role="search" aria-label="Find projects">
             <div className="project-search">
               <Search size={20} aria-hidden="true" />
-              <input aria-label="Search projects" placeholder="Search projects…" value={search} onChange={event => setSearch(event.target.value)} type="search" />
+              <input aria-label="Search projects" placeholder="Search projects…" value={search} onChange={event => handleSearchChange(event.target.value)} type="search" />
             </div>
-            <select aria-label="Filter by skill" value={skill} onChange={event => setSkill(event.target.value)}>
+            <select aria-label="Filter by skill" value={skill} onChange={event => handleSkillChange(event.target.value)}>
               <option value="">Skills</option>
               {skills.map(item => <option key={item}>{item}</option>)}
             </select>
-            <select aria-label="Filter by project type" value={type} onChange={event => setType(event.target.value)}>
+            <select aria-label="Filter by project type" value={type} onChange={event => handleTypeChange(event.target.value)}>
               <option value="">Project type</option>
               {projectTypes.map(item => <option key={item}>{item}</option>)}
             </select>
-            <label className="project-open-filter">Open roles<input type="checkbox" checked={openOnly} onChange={event => setOpenOnly(event.target.checked)} /><span aria-hidden="true" /></label>
+            <label className="project-open-filter">Open roles<input type="checkbox" checked={openOnly} onChange={event => handleOpenOnlyChange(event.target.checked)} /><span aria-hidden="true" /></label>
           </div>
 
           <div className="projects-results-heading">
@@ -98,3 +108,5 @@ export function ProjectsPage() {
     </div>
   );
 }
+
+

@@ -1,34 +1,90 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Button } from '../../shared/components/Button';
-import { CoursePicker } from '../study-buddy/CoursePicker';
-import { ListingSearchFields } from '../study-buddy/ListingSearchFields';
-import { GroupCard } from './GroupCard';
+import { Clock, MapPin, UsersRound } from 'lucide-react';
+import { Button } from '../../shared/components';
+import { CoursePicker } from '../study-buddy/StudyBuddyComponents';
+import { ListingSearchFields } from '../study-buddy/StudyBuddyComponents';
 import {
   browseGroups,
   cancelGroup,
   createGroup,
+  emptyStudyGroupFilters,
+  getFormValue,
+  hasInvalidTimeRange,
   joinGroup,
   refreshGroup,
-} from './groupApi';
-import type { StudyGroup } from './groupApi';
+} from './studyGroups';
+import type { StudyGroup } from './studyGroups';
 import '../study-buddy/studyBuddy.css';
-import './groups.css';
-
-const emptyFilters = {
-  major: '',
-  date: '',
-  start_time: '',
-  end_time: '',
-  location: '',
-};
+import './studyGroups.css';
 
 type Screen = 'search' | 'create';
+
+interface GroupCardProps {
+  group: StudyGroup;
+  userId: string | null;
+  pending: boolean;
+  sent: boolean;
+  onJoin: () => void;
+  onRefresh: () => void;
+  onCancel: () => void;
+}
+function GroupCard({ group, userId, pending, sent, onJoin, onRefresh, onCancel }: GroupCardProps) {
+  const isMember = group.members.some(person => person.id === userId);
+  const isFull = group.member_count >= group.max_members || group.status === 'full';
+  const seatsAvailable = group.max_members - group.member_count;
+  const capacityPercent = Math.min(100, (group.member_count / group.max_members) * 100);
+  const roomState = group.status === 'cancelled'
+    ? 'Room cancelled'
+    : isFull
+      ? 'Room full'
+      : `${seatsAvailable} seats available`;
+  const joinLabel = sent ? 'Request sent' : isFull ? 'Room full' : 'Request to join';
+
+  return (
+    <article className="group-card">
+      <div className="group-card-top">
+        <span className="group-icon"><UsersRound size={26} /></span>
+        <span className="group-seats">{group.member_count} / {group.max_members} members</span>
+      </div>
+      <h2>{group.course}</h2>
+      <p className="group-host">Hosted by {group.created_by.full_name}</p>
+      <div className="group-capacity" role="meter" aria-label="Room capacity" aria-valuemin={0} aria-valuemax={group.max_members} aria-valuenow={group.member_count}>
+        <span style={{ width: `${capacityPercent}%` }} />
+      </div>
+      <p className="group-state">{roomState}</p>
+      <p className="group-detail"><Clock size={17} />{group.date} · {group.start_time}–{group.end_time}</p>
+      <p className="group-detail"><MapPin size={17} />{group.location}</p>
+      {group.notes && <p className="group-notes">{group.notes}</p>}
+      <details>
+        <summary>Members ({group.member_count})</summary>
+        <ul>
+          {group.members.map(person => (
+            <li key={person.id}>
+              {person.full_name}{person.id === group.created_by.id ? ' · Host' : ''}
+            </li>
+          ))}
+        </ul>
+      </details>
+      <div className="group-card-actions">
+        {group.status !== 'cancelled' && (
+          isMember ? <span>You’re a member</span> : !userId ? <a href="#login">Log in to request a seat</a> : (
+            <Button disabled={pending || sent || isFull} onClick={onJoin}>{joinLabel}</Button>
+          )
+        )}
+        <button className="reset-link" disabled={pending} onClick={onRefresh}>Refresh room</button>
+        {group.created_by.id === userId && group.status !== 'cancelled' && (
+          <button className="reset-link" disabled={pending} onClick={onCancel}>Cancel room</button>
+        )}
+      </div>
+    </article>
+  );
+}
 
 export function StudyGroupsPage({ userId }: { userId: string | null }) {
   const [course, setCourse] = useState('');
   const [pickerVersion, setPickerVersion] = useState(0);
-  const [filters, setFilters] = useState(emptyFilters);
+  const [filters, setFilters] = useState(emptyStudyGroupFilters);
   const [groups, setGroups] = useState<StudyGroup[]>([]);
   const [screen, setScreen] = useState<Screen>('search');
   const [searched, setSearched] = useState(false);
@@ -51,16 +107,10 @@ export function StudyGroupsPage({ userId }: { userId: string | null }) {
     }
   }
 
-  function hasInvalidTimeRange() {
-    const onlyOneTimeProvided = Boolean(filters.start_time) !== Boolean(filters.end_time);
-    const endBeforeStart = Boolean(filters.start_time) && filters.start_time >= filters.end_time;
-    return onlyOneTimeProvided || endBeforeStart;
-  }
-
   function handleSearch(event: FormEvent) {
     event.preventDefault();
 
-    if (hasInvalidTimeRange()) {
+    if (hasInvalidTimeRange(filters)) {
       setError('Enter both times, with end time after start time, or leave both empty.');
       return;
     }
@@ -70,10 +120,6 @@ export function StudyGroupsPage({ userId }: { userId: string | null }) {
       setGroups(result);
       setSearched(true);
     });
-  }
-
-  function getFormValue(form: FormData, key: string) {
-    return String(form.get(key) ?? '').trim();
   }
 
   function handlePublish(event: FormEvent<HTMLFormElement>) {
@@ -119,7 +165,7 @@ export function StudyGroupsPage({ userId }: { userId: string | null }) {
   }
 
   function handleClearFilters() {
-    setFilters(emptyFilters);
+    setFilters(emptyStudyGroupFilters);
     setCourse('');
     setPickerVersion(version => version + 1);
   }
@@ -239,3 +285,6 @@ export function StudyGroupsPage({ userId }: { userId: string | null }) {
     </div>
   );
 }
+
+
+

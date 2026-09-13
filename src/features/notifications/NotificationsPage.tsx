@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { ArrowRight, Bell, Check, CheckCheck, Inbox, X } from 'lucide-react';
-import { Button } from '../../shared/components/Button';
-import { StudentAvatar } from '../study-buddy/StudentAvatar';
-import { initialNotifications } from './notificationData';
-import type { Notification } from './notificationData';
+import { Button } from '../../shared/components';
+import { StudentAvatar } from '../../shared/components';
+import { initialNotifications, type Notification } from './notifications';
 import './notifications.css';
 
 type Filter = 'All' | 'Unread' | 'Requests';
@@ -99,3 +98,7 @@ export function NotificationsPage() {
     </div>
   );
 }
+
+
+
+

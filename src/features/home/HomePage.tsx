@@ -1,18 +1,18 @@
 import { UnreadChatBadge } from '../messages/UnreadChatBadge';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Bell, Check, GraduationCap, Lightbulb, MessageCircle, UserRound, Users, UsersRound } from 'lucide-react';
-import { loadProfile } from '../profile/profileApi';
-import { StudentAvatar } from '../study-buddy/StudentAvatar';
-import { students } from '../study-buddy/students';
-import { LeafMark } from '../../shared/components/Artwork';
+import { loadProfile } from '../profile/profile';
+import { StudentAvatar } from '../../shared/components';
+import { students } from '../study-buddy/studyBuddy';
+import { LeafMark } from '../../shared/components';
 import campusBackground from './hitsz-campus.png';
 import './home.css';
 
 const features = [
-  { name: 'Study Buddy', description: 'Find students who want to study the same course or topic.', icon: Users, href: '#study-buddy' },
-  { name: 'Ask a Senior', description: 'Get help from senior students who have already taken the course.', icon: GraduationCap, href: '#ask-senior' },
-  { name: 'Projects', description: 'Find teammates to work on projects, competitions, hackathons, or other ideas together.', icon: Lightbulb, href: '#projects' },
-  { name: 'Study Groups', description: 'Find, join, or create study groups.', icon: UsersRound, href: '#study-groups' },
+  { name: 'Study Buddy', description: 'Find students who want to study the same course or topic.', action: 'Find a study buddy', icon: Users, href: '#study-buddy' },
+  { name: 'Ask a Senior', description: 'Get help from senior students who have already taken the course.', action: 'Meet the seniors', icon: GraduationCap, href: '#ask-senior' },
+  { name: 'Projects', description: 'Find teammates to work on projects, competitions, hackathons, or other ideas together.', action: 'Explore projects', icon: Lightbulb, href: '#projects' },
+  { name: 'Study Groups', description: 'Find, join, or create study groups.', action: 'Find a study room', icon: UsersRound, href: '#study-groups' },
 ];
 
 // Presence is a dashboard fixture, independent of study availability.
@@ -74,14 +74,14 @@ export function HomePage({ userId }: { userId: string | null }) {
       </header></div>
 
       <section className="home-features" aria-label="Explore StudyHive">
-        {features.map(({ name: title, description, icon: Icon, href }) => {
+        {features.map(({ name: title, description, action, icon: Icon, href }) => {
           const content = (
             <>
               <span className="home-feature-icon"><Icon size={26} aria-hidden="true" /></span>
               <h2>{title}</h2>
               <p>{description}</p>
               <span className="home-feature-action">
-                {href ? <>{title === 'Study Groups' ? 'Find a study room' : title === 'Projects' ? 'Explore projects' : title === 'Ask a Senior' ? 'Meet the seniors' : 'Find a study buddy'} <ArrowRight size={18} aria-hidden="true" /></> : 'Coming soon'}
+                {href ? <>{action} <ArrowRight size={18} aria-hidden="true" /></> : 'Coming soon'}
               </span>
             </>
           );
