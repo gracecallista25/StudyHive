@@ -58,6 +58,8 @@ Open the Vite URL, normally `http://127.0.0.1:5173`. Without an API URL, support
 The FastAPI implementation is on `feature/backend-auth`:
 
 ```sh
+git remote add origin https://github.com/gracecallista25/StudyHive.git
+git fetch origin
 git worktree add ../StudyHive-backend feature/backend-auth
 cd ../StudyHive-backend
 python -m venv .venv
