@@ -487,6 +487,27 @@ def get_majors(degree: str):
 
 
 
+@app.get("/users")
+def list_users(major: Optional[str] = Query(None), degree: Optional[str] = Query(None)):
+    results = []
+    for user_id, user in users.items():
+        if major and user["major"] != major:
+            continue
+        if degree and user["degree"] != degree:
+            continue
+        results.append(public_user(user_id))
+
+    return {"status": "success", "users": results}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1296,6 +1317,30 @@ def get_my_asked_questions(user_id: str):
 
 
 
+@app.get("/seniors/{user_id}/questions")
+def get_received_questions(user_id: str):
+    if user_id not in senior_profiles:
+        return {"status": "failed", "reason": "This user is not a senior"}
+
+    results = []
+    for question_id, q in senior_questions.items():
+        if q["senior_id"] == user_id:
+            results.append({
+                "question_id": question_id,
+                "from_user": public_user(q["from_user_id"]),
+                "topic": q["topic"],
+                "question": q["question"],
+                "answer": q["answer"],
+                "status": q["status"]
+            })
+
+    return {"status": "success", "questions": results}
+
+
+
+
+
+
 
 
 
@@ -1414,76 +1459,471 @@ def get_messages(conversation_id: str, viewer_id: Optional[str] = Query(None)):
 
 
 
+
+
+
+
 # ---------- fake demo data ----------
 
 def seed_data():
-    # fake users
+    # ---------- fake users ----------
+
     alice_id = str(uuid.uuid4())
     bob_id = str(uuid.uuid4())
     carol_id = str(uuid.uuid4())
+    david_id = str(uuid.uuid4())
+    emma_id = str(uuid.uuid4())
+    frank_id = str(uuid.uuid4())
+    grace_id = str(uuid.uuid4())
+    henry_id = str(uuid.uuid4())
 
     users[alice_id] = {
-        "full_name": "Alice Zhang", "student_id": "22S000001", "password": "demo1234",
-        "email": "alice@hitsz.edu.cn", "major": "Computer Science", "degree": "bachelor", "grade": 3,
-        "description": "CS junior, loves algorithms and bad coffee.", "profile_picture": "",
-        "badges_earned": ["setup_hive"], "badges_displayed": ["setup_hive"]
-    }
-    users[bob_id] = {
-        "full_name": "Bob Chen", "student_id": "22S000002", "password": "demo1234",
-        "email": "bob@hitsz.edu.cn", "major": "Electronic Engineering", "degree": "bachelor", "grade": 2,
-        "description": "Trying to survive circuits class.", "profile_picture": "",
-        "badges_earned": [], "badges_displayed": []
-    }
-    users[carol_id] = {
-        "full_name": "Carol Wu", "student_id": "22S000003", "password": "demo1234",
-        "email": "carol@hitsz.edu.cn", "major": "Computer Technology", "degree": "master", "grade": 1,
-        "description": "First-year master's, TA for Linear Algebra.", "profile_picture": "",
-        "badges_earned": [], "badges_displayed": []
+        "full_name": "Alice Zhang",
+        "student_id": "22S000001",
+        "password": "demo1234",
+        "email": "alice@hitsz.edu.cn",
+        "major": "Computer Science",
+        "degree": "bachelor",
+        "grade": 3,
+        "description": "CS junior who enjoys programming and solving difficult problems.",
+        "profile_picture": "",
+        "badges_earned": ["setup_hive"],
+        "badges_displayed": ["setup_hive"]
     }
 
-    # fake study buddy listing
+    users[bob_id] = {
+        "full_name": "Bob Chen",
+        "student_id": "22S000002",
+        "password": "demo1234",
+        "email": "bob@hitsz.edu.cn",
+        "major": "Electronic Engineering",
+        "degree": "bachelor",
+        "grade": 2,
+        "description": "Trying to survive Electric Circuits and build something useful.",
+        "profile_picture": "",
+        "badges_earned": [],
+        "badges_displayed": []
+    }
+
+    users[carol_id] = {
+        "full_name": "Carol Wu",
+        "student_id": "22S000003",
+        "password": "demo1234",
+        "email": "carol@hitsz.edu.cn",
+        "major": "Computer Technology",
+        "degree": "master",
+        "grade": 1,
+        "description": "First-year master's student interested in networks and statistics.",
+        "profile_picture": "",
+        "badges_earned": ["setup_hive"],
+        "badges_displayed": ["setup_hive"]
+    }
+
+    users[david_id] = {
+        "full_name": "David Li",
+        "student_id": "23S000004",
+        "password": "demo1234",
+        "email": "david@hitsz.edu.cn",
+        "major": "Robot Engineering",
+        "degree": "bachelor",
+        "grade": 2,
+        "description": "Robotics student who spends too much time building things.",
+        "profile_picture": "",
+        "badges_earned": [],
+        "badges_displayed": []
+    }
+
+    users[emma_id] = {
+        "full_name": "Emma Wang",
+        "student_id": "24S000005",
+        "password": "demo1234",
+        "email": "emma@hitsz.edu.cn",
+        "major": "Architecture",
+        "degree": "bachelor",
+        "grade": 4,
+        "description": "Architecture student looking for people to study with.",
+        "profile_picture": "",
+        "badges_earned": ["setup_hive"],
+        "badges_displayed": ["setup_hive"]
+    }
+
+    users[frank_id] = {
+        "full_name": "Frank Huang",
+        "student_id": "24S000006",
+        "password": "demo1234",
+        "email": "frank@hitsz.edu.cn",
+        "major": "Mechanical Engineering",
+        "degree": "bachelor",
+        "grade": 3,
+        "description": "Mechanical engineering student. Always looking for a good study group.",
+        "profile_picture": "",
+        "badges_earned": [],
+        "badges_displayed": []
+    }
+
+    users[grace_id] = {
+        "full_name": "Grace Liu",
+        "student_id": "25S000007",
+        "password": "demo1234",
+        "email": "grace@hitsz.edu.cn",
+        "major": "Biomedical Engineering",
+        "degree": "master",
+        "grade": 2,
+        "description": "Biomedical engineering student interested in science and research.",
+        "profile_picture": "",
+        "badges_earned": [],
+        "badges_displayed": []
+    }
+
+    users[henry_id] = {
+        "full_name": "Henry Zhao",
+        "student_id": "25S000008",
+        "password": "demo1234",
+        "email": "henry@hitsz.edu.cn",
+        "major": "Business Administration",
+        "degree": "bachelor",
+        "grade": 1,
+        "description": "Freshman trying to make friends and keep up with classes.",
+        "profile_picture": "",
+        "badges_earned": [],
+        "badges_displayed": []
+    }
+
+
+    # ---------- fake study buddy listings ----------
+
     listing_id = str(uuid.uuid4())
     study_buddy_listings[listing_id] = {
-        "user_id": alice_id, "course": "Calculus", "date": "2026-09-20",
-        "start_time": "14:00", "end_time": "17:00", "location": "Library 3F",
-        "notes": "Reviewing linked lists and trees before the quiz.",
-        "status": "open", "created_at": datetime.utcnow().isoformat()
+        "user_id": alice_id,
+        "course": "Calculus",
+        "date": "2026-09-20",
+        "start_time": "14:00",
+        "end_time": "17:00",
+        "location": "Library 3F",
+        "notes": "Reviewing integration techniques before the upcoming quiz.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat()
     }
 
-    # fake study group
+    listing_id = str(uuid.uuid4())
+    study_buddy_listings[listing_id] = {
+        "user_id": bob_id,
+        "course": "Electric Circuits",
+        "date": "2026-09-20",
+        "start_time": "18:00",
+        "end_time": "20:00",
+        "location": "Building C, Room 204",
+        "notes": "Going through circuit analysis exercises together.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat()
+    }
+
+    listing_id = str(uuid.uuid4())
+    study_buddy_listings[listing_id] = {
+        "user_id": david_id,
+        "course": "Linear Algebra",
+        "date": "2026-09-21",
+        "start_time": "15:00",
+        "end_time": "17:00",
+        "location": "Library 2F",
+        "notes": "Need some help with eigenvalues and matrix transformations.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat()
+    }
+
+    listing_id = str(uuid.uuid4())
+    study_buddy_listings[listing_id] = {
+        "user_id": emma_id,
+        "course": "Chinese Language",
+        "date": "2026-09-22",
+        "start_time": "16:00",
+        "end_time": "18:00",
+        "location": "Student Center",
+        "notes": "Practicing speaking and reviewing vocabulary together.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat()
+    }
+
+    listing_id = str(uuid.uuid4())
+    study_buddy_listings[listing_id] = {
+        "user_id": frank_id,
+        "course": "College Physics IA",
+        "date": "2026-09-23",
+        "start_time": "19:00",
+        "end_time": "21:00",
+        "location": "Building D, Room 301",
+        "notes": "Working through mechanics problem sets.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat()
+    }
+
+    listing_id = str(uuid.uuid4())
+    study_buddy_listings[listing_id] = {
+        "user_id": henry_id,
+        "course": "Pre-Calculus",
+        "date": "2026-09-24",
+        "start_time": "13:00",
+        "end_time": "15:00",
+        "location": "Library 1F",
+        "notes": "Looking for someone to review functions and trigonometry.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat()
+    }
+
+
+    # ---------- fake study groups ----------
+
     group_id = str(uuid.uuid4())
-    conv_id = create_group_conversation("Linear Algebra Study Group", bob_id)
+    conv_id = create_group_conversation(
+        "Linear Algebra Study Group",
+        bob_id
+    )
+
     study_groups[group_id] = {
-        "creator_id": bob_id, "course": "Linear Algebra", "date": "2026-09-21",
-        "start_time": "18:00", "end_time": "20:00", "location": "Building C, Room 302",
-        "max_members": 4, "members": [bob_id], "notes": "Going over eigenvalues, bring your notes.",
-        "status": "open", "created_at": datetime.utcnow().isoformat(), "conversation_id": conv_id
+        "creator_id": bob_id,
+        "course": "Linear Algebra",
+        "date": "2026-09-21",
+        "start_time": "18:00",
+        "end_time": "20:00",
+        "location": "Building C, Room 302",
+        "max_members": 4,
+        "members": [bob_id],
+        "notes": "Going over eigenvalues and matrix transformations.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat(),
+        "conversation_id": conv_id
     }
 
-    # fake project
+    group_id = str(uuid.uuid4())
+    conv_id = create_group_conversation(
+        "Programming Practice",
+        alice_id
+    )
+
+    study_groups[group_id] = {
+        "creator_id": alice_id,
+        "course": "High-level Language Programming (C++)",
+        "date": "2026-09-22",
+        "start_time": "17:00",
+        "end_time": "19:00",
+        "location": "Library 4F",
+        "max_members": 5,
+        "members": [alice_id],
+        "notes": "Practice C++ problems and help each other debug code.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat(),
+        "conversation_id": conv_id
+    }
+
+    group_id = str(uuid.uuid4())
+    conv_id = create_group_conversation(
+        "Probability Review",
+        carol_id
+    )
+
+    study_groups[group_id] = {
+        "creator_id": carol_id,
+        "course": "Probability and Statistics",
+        "date": "2026-09-23",
+        "start_time": "18:30",
+        "end_time": "20:30",
+        "location": "Building B, Room 205",
+        "max_members": 4,
+        "members": [carol_id],
+        "notes": "Reviewing probability distributions and statistics exercises.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat(),
+        "conversation_id": conv_id
+    }
+
+    group_id = str(uuid.uuid4())
+    conv_id = create_group_conversation(
+        "Physics Problem Solving",
+        frank_id
+    )
+
+    study_groups[group_id] = {
+        "creator_id": frank_id,
+        "course": "College Physics IB",
+        "date": "2026-09-25",
+        "start_time": "15:00",
+        "end_time": "17:00",
+        "location": "Building D, Room 205",
+        "max_members": 6,
+        "members": [frank_id],
+        "notes": "Solving problems together and preparing for the next test.",
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat(),
+        "conversation_id": conv_id
+    }
+
+
+    # ---------- fake projects ----------
+
     project_id = str(uuid.uuid4())
-    conv_id2 = create_group_conversation("Campus Connect", carol_id)
+    conv_id = create_group_conversation(
+        "Campus Connect",
+        carol_id
+    )
+
     projects[project_id] = {
-        "creator_id": carol_id, "name": "Campus Connect",
-        "summary": "Help students find events and communities on campus.",
-        "description": "A simple place for students to discover campus events, find communities, and make plans together.",
+        "creator_id": carol_id,
+        "name": "Campus Connect",
+        "summary": "A platform that helps students discover campus communities.",
+        "description": "A simple place for students to discover events, find communities, and make plans together.",
         "project_type": "Class project",
         "roles": [
-            {"role_name": "Frontend developer", "skills": ["React", "UI design"], "filled": False},
-            {"role_name": "UI designer", "skills": ["Figma", "UI design"], "filled": False}
+            {
+                "role_name": "Frontend developer",
+                "skills": ["C++"],
+                "filled": False
+            },
+            {
+                "role_name": "UI designer",
+                "skills": ["Architecture"],
+                "filled": False
+            }
         ],
-        "members": [], "status": "open", "created_at": datetime.utcnow().isoformat(),
-        "conversation_id": conv_id2
+        "members": [],
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat(),
+        "conversation_id": conv_id
     }
 
-    # fake senior
+    project_id = str(uuid.uuid4())
+    conv_id = create_group_conversation(
+        "Smart Campus Robot",
+        david_id
+    )
+
+    projects[project_id] = {
+        "creator_id": david_id,
+        "name": "Smart Campus Robot",
+        "summary": "Build a small robot to help students navigate campus.",
+        "description": "A student robotics project focused on navigation and useful campus assistance.",
+        "project_type": "Personal project",
+        "roles": [
+            {
+                "role_name": "Mechanical engineer",
+                "skills": ["Mechanical Engineering"],
+                "filled": False
+            },
+            {
+                "role_name": "Electronics member",
+                "skills": ["Electronic Engineering"],
+                "filled": False
+            }
+        ],
+        "members": [],
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat(),
+        "conversation_id": conv_id
+    }
+
+    project_id = str(uuid.uuid4())
+    conv_id = create_group_conversation(
+        "Student Research Project",
+        grace_id
+    )
+
+    projects[project_id] = {
+        "creator_id": grace_id,
+        "name": "Student Research Project",
+        "summary": "Explore applications of biomedical engineering in daily life.",
+        "description": "A small research project looking at how engineering can improve healthcare and student life.",
+        "project_type": "Research",
+        "roles": [
+            {
+                "role_name": "Research assistant",
+                "skills": ["Probability and Statistics"],
+                "filled": False
+            },
+            {
+                "role_name": "Project member",
+                "skills": ["Life And Health Science"],
+                "filled": False
+            }
+        ],
+        "members": [],
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat(),
+        "conversation_id": conv_id
+    }
+
+
+    # ---------- fake senior profiles ----------
+
     senior_profiles[carol_id] = {
-        "full_name": "Carol Wu", "major": "Computer Technology", "year_of_study": 1,
-        "courses": ["Computer Networks", "Probability and Statistics"], "topics": ["Course planning", "Exam prep"],
-        "bio": "Happy to help with Probability and Statistics — I TA'd it last semester.",
-        "availability_text": "Weekday evenings", "available": True
+        "full_name": "Carol Wu",
+        "major": "Computer Technology",
+        "year_of_study": 1,
+        "courses": [
+            "Computer Networks",
+            "Probability and Statistics"
+        ],
+        "topics": [
+            "Course planning",
+            "Exam prep",
+            "Study strategies"
+        ],
+        "bio": "Happy to help with Computer Networks and Probability and Statistics.",
+        "availability_text": "Weekday evenings",
+        "available": True
     }
 
+    senior_profiles[alice_id] = {
+        "full_name": "Alice Zhang",
+        "major": "Computer Science",
+        "year_of_study": 3,
+        "courses": [
+            "Calculus",
+            "High-level Language Programming (C++)"
+        ],
+        "topics": [
+            "Programming",
+            "Calculus",
+            "Exam prep"
+        ],
+        "bio": "Can help with C++ programming and Calculus. Always happy to explain things.",
+        "availability_text": "Tuesday and Thursday afternoons",
+        "available": True
+    }
+
+    senior_profiles[emma_id] = {
+        "full_name": "Emma Wang",
+        "major": "Architecture",
+        "year_of_study": 4,
+        "courses": [
+            "Chinese Language",
+            "Life And Health Science"
+        ],
+        "topics": [
+            "Course planning",
+            "Campus life"
+        ],
+        "bio": "Fourth-year student. Happy to share my experience with new students.",
+        "availability_text": "Weekend afternoons",
+        "available": True
+    }
+
+    senior_profiles[frank_id] = {
+        "full_name": "Frank Huang",
+        "major": "Mechanical Engineering",
+        "year_of_study": 3,
+        "courses": [
+            "College Physics IA",
+            "College Physics IB",
+            "Linear Algebra"
+        ],
+        "topics": [
+            "Physics",
+            "Problem solving",
+            "Exam prep"
+        ],
+        "bio": "I can help with Physics and Linear Algebra problem solving.",
+        "availability_text": "Monday and Wednesday evenings",
+        "available": True
+    }
 
 @app.on_event("startup")
 def on_startup():
