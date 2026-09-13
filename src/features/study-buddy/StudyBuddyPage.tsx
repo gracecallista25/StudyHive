@@ -12,17 +12,16 @@ export function StudyBuddyPage({ initialCourse = '' }: { initialCourse?: string 
   const [course, setCourse] = useState(initialCourse);
   const [mode, setMode] = useState<StudyMode>('Either');
   const [searching, setSearching] = useState(!initialCourse);
+  const [submittedSearch, setSubmittedSearch] = useState({ course: initialCourse, mode: 'Either' as StudyMode });
   const [courseOnly, setCourseOnly] = useState(false);
   const [index, setIndex] = useState(0);
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
-  const matches = matchStudents(course, mode, courseOnly);
+  const matches = matchStudents(submittedSearch.course, submittedSearch.mode, courseOnly);
   const student = matches[index];
   const available = matches.filter(person => person.availableToStudy).length;
 
   function editSearch() {
-    setSearching(true);
-    setIndex(0);
-    setCourseOnly(false);
+    document.getElementById('buddy-course')?.focus();
   }
 
   function handleSearch(event: React.FormEvent<HTMLFormElement>) {
@@ -35,6 +34,7 @@ export function StudyBuddyPage({ initialCourse = '' }: { initialCourse?: string 
     }
     setIndex(0);
     setCourseOnly(false);
+    setSubmittedSearch({ course, mode });
     setSearching(false);
   }
 
@@ -60,13 +60,13 @@ export function StudyBuddyPage({ initialCourse = '' }: { initialCourse?: string 
       <header className="hero">
         <div className="hero-copy">
           <p className="breadcrumb">Campus <span>/</span><strong>Study Buddy</strong></p>
-          <h1>Find a Study Buddy</h1>
+          <h1>Good company.<br />Better progress.</h1>
           <p className="hero-subtitle">{searching ? 'What are you studying today?' : 'A good study session starts with the right company.'}</p>
         </div>
         <AcademicArt />
       </header>
 
-      {searching ? (
+      <>
         <form className="buddy-start" onSubmit={handleSearch}>
           <CoursePicker value={course} onChange={setCourse} />
           <fieldset className="buddy-modes">
@@ -80,13 +80,9 @@ export function StudyBuddyPage({ initialCourse = '' }: { initialCourse?: string 
           </fieldset>
           <Button type="submit">Find Study Buddies <ArrowRight size={17} /></Button>
         </form>
-      ) : (
+      </>
+      {!searching && (
         <section aria-label="Study buddy results">
-          <div className="buddy-selection">
-            <div><span>Studying:</span><strong>{course}</strong></div>
-            <div><span>Mode:</span><strong>{courseOnly ? 'Any mode (course only)' : mode}</strong></div>
-            <button className="reset-link" onClick={editSearch}>Change</button>
-          </div>
           <p className="buddy-count">{available} {available === 1 ? 'student' : 'students'} available to study · {matches.length} {matches.length === 1 ? 'match' : 'matches'}</p>
 
           {student ? (

@@ -20,3 +20,67 @@
 @media(max-width:800px){.group-grid{grid-template-columns:1fr;}.group-toolbar{flex-wrap:wrap;}}
 
 .group-feedback,.group-error { margin-bottom:16px; }
+
+/* Editorial room discovery. */
+.groups-page { max-width:1510px; padding:28px 40px; }
+.group-hero { position:relative; min-height:235px; padding-right:32%; }
+.groups-page .group-hero h1 { font:700 clamp(42px,4.6vw,74px)/1.04 var(--font-editorial); letter-spacing:-2.7px; margin:22px 0 16px; }
+.group-subtitle { font-size:clamp(16px,1.35vw,21px); line-height:1.5; }
+.group-table-art { position:absolute; width:31%; height:240px; right:0; top:10px; }
+.group-toolbar { margin:18px 0; }
+.group-toolbar h2 { font:700 27px var(--font-editorial); }
+.group-form { background:var(--color-sage); border:1px solid #dfe5d7; border-radius:12px; }
+.group-search-form fieldset { grid-template-columns:minmax(180px,1fr) 3fr; align-items:start; gap:18px; }
+.group-search-form .buddy-search-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.group-search-form .buddy-search-location { grid-column:auto; }
+.group-search-form .buddy-note { grid-column:1 / -1; text-align:left; }
+.group-search-form .group-card-actions { grid-column:1 / -1; margin-top:0; }
+.group-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; align-items:stretch; }
+.group-card { padding:22px; border:1px solid #aebdad; border-radius:12px; background:var(--color-cream); display:flex; flex-direction:column; }
+.group-card h2 { font:700 25px/1.2 var(--font-editorial); margin:18px 0 8px; }
+.group-icon { border-radius:50%; background:var(--color-sage); }
+.group-capacity { height:9px; flex-shrink:0; }
+.group-capacity span { background:var(--color-honey); border-radius:inherit; }
+.group-state { color:var(--color-forest); }
+.group-detail { line-height:1.5; margin:8px 0; }
+.group-notes { font-size:14px; }
+.group-card details { margin-bottom:20px; }
+.group-card > .group-card-actions { margin-top:auto; gap:12px; }
+.group-card .button { background:var(--color-honey); border-color:var(--color-honey); color:var(--color-ink); }
+@media(max-width:1300px) { .group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:800px) {
+  .groups-page { padding:22px 18px; }
+  .group-hero { padding-right:0; min-height:0; }
+  .group-table-art { display:none; }
+  .groups-page .group-hero h1 { font-size:42px; letter-spacing:-1.6px; }
+  .group-grid,.group-search-form fieldset,.group-search-form .buddy-search-grid { grid-template-columns:1fr; }
+}
+
+@media (min-width:1051px) {
+  .group-search-form fieldset { grid-template-columns:minmax(140px,1.25fr) repeat(5,minmax(0,1fr)) minmax(110px,1fr); gap:12px; align-items:start; }
+  .group-search-form .buddy-search-grid { display:contents; }
+  .group-search-form .buddy-note { grid-column:1 / -1; grid-row:2; }
+  .group-search-form .group-card-actions { grid-column:7; grid-row:1; display:grid; gap:8px; padding-top:24px; }
+  .group-search-form .group-card-actions .button { padding:10px; font-size:13px; }
+  .group-search-form .buddy-picker > label { margin-bottom:7px; font-size:13px; }
+  .group-search-form .buddy-picker-control { height:44px; }
+  .group-search-form .buddy-picker-control input { padding:10px; font-size:13px; border:0; }
+  .group-search-form .buddy-picker-control button { padding:6px; }
+}
+
+.group-hero { display: grid; grid-template-columns: minmax(0,1fr) auto; column-gap: 24px; min-height: 0; padding-right: 0; margin-bottom: 30px; }
+.group-hero .breadcrumb { grid-column: 1 / -1; }
+.group-hero > h1, .group-hero > .group-subtitle { grid-column: 1; }
+.group-hero > .button { grid-column: 2; grid-row: 2 / 4; align-self: center; padding: 14px 22px; font-size: 16px; }
+.group-search-form { padding: 16px 20px; }
+@media (min-width:1051px) {
+  .group-search-form fieldset { gap: 10px; }
+  .group-search-form .group-card-actions { display: contents; }
+  .group-search-form .group-card-actions .button { grid-column: 7; grid-row: 1; align-self: end; min-height: 44px; }
+  .group-search-form .group-card-actions .reset-link { grid-column: 7; grid-row: 2; align-self: center; justify-self: end; margin: 0; }
+  .group-search-form .buddy-note { grid-column: 1 / 7; grid-row: 2; align-self: center; margin: 0; }
+}
+@media(max-width:720px) {
+  .group-hero { grid-template-columns: 1fr; }
+  .group-hero > .button { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 16px; }
+}

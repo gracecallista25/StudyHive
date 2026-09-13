@@ -118,3 +118,64 @@
 .buddy-search-grid .buddy-note { margin: 0; font-size: 12px; }
 .buddy-selection strong { overflow-wrap: anywhere; }
 @media (max-width: 720px) { .buddy-search-grid { grid-template-columns: 1fr; } }
+
+/* Editorial discovery, matching the campus feature pages. */
+.buddy-page:not(.groups-page) { max-width:1510px; padding:28px 40px; }
+.buddy-page:not(.groups-page) .hero { min-height:230px; align-items:center; margin-bottom:24px; }
+.buddy-page:not(.groups-page) .hero-copy { width:72%; }
+.buddy-page:not(.groups-page) h1 { font:700 clamp(42px,4.6vw,74px)/1.04 var(--font-editorial); letter-spacing:-2.7px; margin:0 0 16px; }
+.buddy-page:not(.groups-page) .academic-art { display:block; opacity:1; width:27%; height:200px; top:24px; }
+.buddy-page:not(.groups-page) .hero-subtitle { font-size:clamp(16px,1.35vw,21px); }
+.buddy-page:not(.groups-page) .buddy-start { max-width:none; background:var(--color-sage); border-radius:12px; border-color:#dfe5d7; padding:24px; margin:0 0 26px; }
+.buddy-page .buddy-picker-control { background:white; }
+.buddy-page:not(.groups-page) .buddy-start:has(.buddy-modes) { display:grid; grid-template-columns:minmax(220px,1fr) auto auto; align-items:end; gap:24px; }
+.buddy-page .buddy-modes { margin:0; }
+.buddy-page .buddy-modes label { padding:12px; }
+.buddy-page .buddy-search-form .buddy-live-fields { grid-template-columns:minmax(200px,1fr) 3fr; align-items:start; }
+.buddy-search-form .buddy-search-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.buddy-search-form .buddy-search-location { grid-column:auto; }
+.buddy-search-form .buddy-search-grid .buddy-note { grid-column:1 / -1; text-align:left; }
+.buddy-search-form .buddy-search-actions { grid-column:1 / -1; }
+.buddy-page .buddy-selection { background:var(--color-sage); border-color:#dfe5d7; }
+.buddy-page .buddy-card.buddy-focused { border:1px solid #bcc8bb; border-radius:12px; background:var(--color-cream); grid-template-columns:minmax(240px,40%) minmax(0,1fr); box-shadow:none; }
+.buddy-person-panel { background:linear-gradient(140deg,#eaf0e4,#cfdbc2); padding:28px; }
+.buddy-page .buddy-person-panel .avatar,.buddy-page .buddy-person-panel .profile-portrait { width:clamp(130px,12vw,190px); height:clamp(130px,12vw,190px); }
+.buddy-detail-panel { padding:30px; }
+.buddy-detail-facts > div { border-top:0; padding:10px 0; }
+.buddy-detail-facts > .student-description { border-top:1px solid var(--border); margin-top:12px; padding-top:18px; }
+.buddy-page section[aria-label="Study buddy results"] > .buddy-actions .button:nth-child(2) { background:var(--color-honey); color:var(--color-ink); border-color:var(--color-honey); }
+@media(max-width:1200px) { .buddy-page:not(.groups-page) .buddy-start:has(.buddy-modes) { grid-template-columns:1fr; gap:18px; } }
+@media(max-width:720px) {
+  .buddy-page:not(.groups-page) { padding:22px 18px; }
+  .buddy-page:not(.groups-page) .hero { min-height:190px; margin-bottom:18px; }
+  .buddy-page:not(.groups-page) .hero-copy { width:100%; }
+  .buddy-page:not(.groups-page) .academic-art { display:none; }
+  .buddy-page:not(.groups-page) h1 { font-size:42px; letter-spacing:-1.6px; }
+  .buddy-page .buddy-search-form .buddy-live-fields,.buddy-search-form .buddy-search-grid,.buddy-page .buddy-card.buddy-focused { grid-template-columns:1fr; }
+  .buddy-page:not(.groups-page) .buddy-start,.buddy-detail-panel { padding:20px; }
+}
+
+/* Keep the six discovery filters on one desktop row. */
+@media (min-width: 1051px) {
+  .buddy-page .buddy-search-form .buddy-live-fields { grid-template-columns: minmax(140px,1.25fr) repeat(5,minmax(0,1fr)) minmax(150px,1.3fr); gap:12px; align-items:start; }
+  .buddy-search-form .buddy-search-grid { display:contents; }
+  .buddy-search-form .buddy-search-grid .buddy-note { grid-column:1 / -1; grid-row:2; }
+  .buddy-search-form .buddy-search-actions { grid-column:7; grid-row:1; display:grid; gap:8px; padding-top:24px; }
+  .buddy-search-form .buddy-search-actions .button { padding:10px 8px; font-size:12px; min-width:0; }
+  .buddy-search-form .buddy-search-actions .reset-link { font-size:11px; }
+  .buddy-search-form .buddy-picker > label { font-size:13px; margin-bottom:7px; }
+  .buddy-search-form .buddy-picker-control { height:44px; }
+  .buddy-search-form .buddy-picker-control input { font-size:13px; padding:10px; }
+  .buddy-search-form .buddy-picker-control button { padding:6px; }
+  .buddy-page:not(.groups-page) .buddy-start:has(.buddy-modes) { grid-template-columns:minmax(180px,1fr) auto auto; }
+}
+
+/* Compact discovery controls with help and reset on the same row. */
+.buddy-page:not(.groups-page) .buddy-search-form { padding: 16px 20px; }
+@media (min-width: 1051px) {
+  .buddy-page .buddy-search-form .buddy-live-fields { grid-template-columns: minmax(130px,1.2fr) repeat(5,minmax(0,1fr)) minmax(125px,1.15fr) minmax(125px,1.15fr); gap: 10px; }
+  .buddy-search-form .buddy-search-actions { grid-column: 7 / 9; grid-row: 1 / 3; display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding-top: 24px; }
+  .buddy-search-form .buddy-search-actions .button { min-height: 44px; }
+  .buddy-search-form .buddy-search-actions .reset-link { align-self: flex-end; }
+  .buddy-search-form .buddy-search-grid .buddy-note { grid-column: 1 / 7; grid-row: 2; align-self: center; }
+}

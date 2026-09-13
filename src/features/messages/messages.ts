@@ -2,6 +2,41 @@ export type Person = { id: string; name: string; avatar: 'lin' | 'maya' | 'alex'
 export type ChatFile = { name: string; size: string; url: string };
 export type ChatMessage = { id: string; sender: string; text: string; time: string; file?: ChatFile };
 export type Conversation = { id: string; name: string; kind: 'personal' | 'group'; members: string[]; unread: number; description: string; pinned?: string; messages: ChatMessage[] };
+export const messagesConnected = Boolean(import.meta.env.VITE_API_BASE_URL?.trim());
+
+async function messageRequest(path: string, method = 'GET', body?: unknown) {
+  const base = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '');
+  const response = await fetch(base + path, { method, signal: AbortSignal.timeout(15000),
+    ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }) });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || data?.status !== 'success') throw new Error(data?.reason || 'The message request failed.');
+  return data;
+}
+
+type ApiConversation = { id: string; type: 'personal' | 'group'; name: string | null; members: { id: string; full_name: string; major: string }[]; last_message: { from_user_id: string; text: string; created_at: string } | null };
+function readConversation(item: ApiConversation, userId: string): Conversation {
+  const others = item.members.filter(member => member.id !== userId);
+  const last = item.last_message;
+  return { id: item.id, name: item.name || others.map(member => member.full_name).join(', '), kind: item.type,
+    members: others.map(member => member.id), unread: 0, description: others[0] ? `${others[0].major} · StudyHive` : 'A StudyHive conversation.',
+    messages: last ? [{ id: `${item.id}-last`, sender: last.from_user_id === userId ? 'you' : last.from_user_id, text: last.text, time: new Date(last.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }] : [] };
+}
+export async function loadConversations(userId: string, query = '') {
+  const suffix = query ? '?search=' + encodeURIComponent(query) : '';
+  const data = await messageRequest('/conversations/' + encodeURIComponent(userId) + suffix);
+  return (data.conversations as ApiConversation[]).map(item => readConversation(item, userId));
+}
+export async function loadMessages(conversationId: string, userId: string) {
+  const data = await messageRequest('/conversations/' + encodeURIComponent(conversationId) + '/messages?viewer_id=' + encodeURIComponent(userId));
+  return (data.messages as { from_user_id: string; text: string; created_at: string; id?: string }[]).map(message => ({ id: message.id || crypto.randomUUID(), sender: message.from_user_id === userId ? 'you' : message.from_user_id, text: message.text, time: new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }));
+}
+export async function postMessage(conversationId: string, userId: string, text: string) {
+  await messageRequest('/conversations/' + encodeURIComponent(conversationId) + '/messages', 'POST', { from_user_id: userId, text });
+}
+export async function createConversation(userId: string, type: 'personal' | 'group', memberIds: string[], name?: string) {
+  const data = await messageRequest('/conversations', 'POST', { creator_id: userId, type, member_ids: memberIds, ...(name ? { name } : {}) });
+  return readConversation(data.conversation as ApiConversation, userId);
+}
 export const people: Person[] = [
   { id: 'lin', name: 'Lin Chen', avatar: 'lin', detail: 'Computer Science · Year 2' },
   { id: 'maya', name: 'Maya Tan', avatar: 'maya', detail: 'Design · Year 2' },

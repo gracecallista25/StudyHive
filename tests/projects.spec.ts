@@ -6,7 +6,7 @@ test('Project search, skill filters and closed teams work', async ({ page }) => 
   await expect(page.getByRole('link', { name: 'Projects', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('article')).toHaveCount(4);
   await page.getByRole('searchbox', { name: 'Search projects' }).fill('campus');
-  await page.getByRole('combobox', { name: 'Filter by skill' }).selectOption('Data analysis');
+  await page.getByRole('searchbox', { name: 'Filter by skill' }).fill('data ana');
   await expect(page.getByRole('article')).toHaveCount(1);
   await expect(page.getByRole('heading', { name: 'Green Campus', exact: true })).toBeVisible();
   await page.getByRole('combobox', { name: 'Filter by project type' }).selectOption('Hackathon');

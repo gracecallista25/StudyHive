@@ -1,32 +1,21 @@
 import { UnreadChatBadge } from '../messages/UnreadChatBadge';
 import { useEffect, useState } from 'react';
-import { ArrowRight, Bell, Check, GraduationCap, Lightbulb, MessageCircle, UserRound, Users, UsersRound } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Bell, GraduationCap, Lightbulb, MessageCircle, UserRound, Users, UsersRound } from 'lucide-react';
 import { loadProfile } from '../profile/profile';
-import { StudentAvatar } from '../../shared/components';
-import { students } from '../study-buddy/studyBuddy';
 import { LeafMark } from '../../shared/components';
 import campusBackground from './hitsz-campus.png';
 import './home.css';
 
 const features = [
   { name: 'Study Buddy', description: 'Find students who want to study the same course or topic.', action: 'Find a study buddy', icon: Users, href: '#study-buddy' },
-  { name: 'Ask a Senior', description: 'Get help from senior students who have already taken the course.', action: 'Meet the seniors', icon: GraduationCap, href: '#ask-senior' },
-  { name: 'Projects', description: 'Find teammates to work on projects, competitions, hackathons, or other ideas together.', action: 'Explore projects', icon: Lightbulb, href: '#projects' },
   { name: 'Study Groups', description: 'Find, join, or create study groups.', action: 'Find a study room', icon: UsersRound, href: '#study-groups' },
-];
-
-// Presence is a dashboard fixture, independent of study availability.
-const onlineStudents = students;
-const activities = [
-  { text: 'Alex Wu accepted your study request.', time: '10 minutes ago', icon: Check },
-  { text: 'Maya Tan sent you a message.', time: '35 minutes ago', icon: MessageCircle },
-  { text: 'Lin Chen responded to your request.', time: '1 hour ago', icon: Users },
+  { name: 'Projects', description: 'Find teammates to work on projects, competitions, hackathons, or other ideas together.', action: 'Explore projects', icon: Lightbulb, href: '#projects' },
+  { name: 'Ask a Senior', description: 'Get help from senior students who have already taken the course.', action: 'Meet the seniors', icon: GraduationCap, href: '#ask-senior' },
 ];
 
 export function HomePage({ userId }: { userId: string | null }) {
   const [identity, setIdentity] = useState<{ id: string; name: string } | null>(null);
   const [profileFailed, setProfileFailed] = useState(false);
-  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,10 +36,6 @@ export function HomePage({ userId }: { userId: string | null }) {
     };
   }, [userId]);
 
-  function toggleOnlineStudents() {
-    setShowAll(current => !current);
-  }
-
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const name = identity?.id === userId ? identity.name : '';
@@ -70,6 +55,10 @@ export function HomePage({ userId }: { userId: string | null }) {
         <p className="breadcrumb">Campus <span>/</span><strong>Home</strong></p>
         <h1>{greeting}{name ? `, ${name}` : ''}!</h1>
         <p className="home-subtitle">What do you want to do today?</p>
+        <a className="home-resources-link" href="https://github.com/elalamiimed/HITSZCS" target="_blank" rel="noopener noreferrer">
+          Notes &amp; lectures <ArrowUpRight size={16} aria-hidden="true" />
+          <span className="sr-only"> (opens in a new tab)</span>
+        </a>
         {userId && profileFailed && <p className="home-note" role="status">Your name could not be loaded. You can still explore the dashboard.</p>}
       </header></div>
 
@@ -90,24 +79,6 @@ export function HomePage({ userId }: { userId: string | null }) {
         })}
       </section>
 
-      <div className="home-details">
-        <section className="home-panel" aria-labelledby="home-online-title">
-          <div className="home-panel-heading"><h2 id="home-online-title">Students Online</h2><span className="home-sample">Sample data</span></div>
-          <p className="home-online-count"><span aria-hidden="true" />{onlineStudents.length} students online</p>
-          <div className="home-online-preview">
-            <div className="home-avatar-stack">{onlineStudents.slice(0, 4).map(student => <span key={student.id} title={student.name}><StudentAvatar variant={student.avatar} /></span>)}</div>
-            <button className="reset-link" aria-expanded={showAll} aria-controls="home-online-list" onClick={toggleOnlineStudents}>{showAll ? 'Show less' : 'View all'}</button>
-          </div>
-          <p className="home-note">Active on StudyHive, not necessarily available to study.</p>
-          <ul id="home-online-list" className="home-online-list" hidden={!showAll}>
-            {onlineStudents.map(student => <li key={student.id}><StudentAvatar variant={student.avatar} /><span>{student.name}</span><span className="home-online-label">Online</span></li>)}
-          </ul>
-        </section>
-        <section className="home-panel home-activity" aria-labelledby="home-activity-title">
-          <div className="home-panel-heading"><h2 id="home-activity-title">Your Activity</h2><span className="home-sample">Sample data</span></div>
-          <ul>{activities.map(({ text, time, icon: Icon }) => <li key={text}><span className="home-activity-icon"><Icon size={18} aria-hidden="true" /></span><div><p>{text}</p><span>{time}</span></div></li>)}</ul>
-        </section>
-      </div>
     </div>
   );
 }

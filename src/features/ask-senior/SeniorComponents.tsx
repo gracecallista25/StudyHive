@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, Check, Laptop } fro
 import { Button } from '../../shared/components';
 import { StudentAvatar } from '../../shared/components';
 import type { Senior, SeniorQuestion, SeniorApplication } from './seniors';
+import { seniorsConnected } from './seniors';
+import { ProfilePortrait } from '../profile/ProfilePortrait';
 
 
 interface SeniorCardProps {
@@ -15,7 +17,7 @@ interface SeniorCardProps {
 export function SeniorCard({ senior, onView, onAsk }: SeniorCardProps) {
   return (
     <article className="senior-card">
-      <StudentAvatar variant={senior.avatar} />
+      {seniorsConnected ? <ProfilePortrait name={senior.name} source={senior.picture || ''} /> : <StudentAvatar variant={senior.avatar} />}
       <div className="senior-card-info">
         <div className="senior-card-heading">
           <h3>{senior.name}</h3>
@@ -47,14 +49,15 @@ interface SeniorProfileProps {
   focusQuestion: boolean;
   savedQuestion?: SeniorQuestion;
   onBack: () => void;
-  onSave: (question: SeniorQuestion) => void;
+  onSave: (question: SeniorQuestion) => Promise<void>;
   onEdit: () => void;
 }
 
 const topicIcons = [Laptop, BriefcaseBusiness, BookOpen];
 
 export function SeniorProfile({ senior, focusQuestion, savedQuestion, onBack, onSave, onEdit }: SeniorProfileProps) {
-  const [topic, setTopic] = useState(savedQuestion?.topic ?? senior.topics[0].title);
+  const [topic, setTopic] = useState(savedQuestion?.topic ?? senior.topics[0]?.title ?? 'General');
+  const [pending, setPending] = useState(false);
   const [message, setMessage] = useState(savedQuestion?.message ?? '');
   const [error, setError] = useState('');
   const questionRef = useRef<HTMLTextAreaElement>(null);
@@ -71,16 +74,19 @@ export function SeniorProfile({ senior, focusQuestion, savedQuestion, onBack, on
     questionRef.current?.focus();
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!senior.available) return;
+    if (!senior.available || pending) return;
     if (message.trim().length < 10) {
       setError('Add a little more detail—at least 10 characters—so your question is clear.');
       questionRef.current?.focus();
       return;
     }
     setError('');
-    onSave({ topic, message: message.trim() });
+    setPending(true);
+    try { await onSave({ topic, message: message.trim() }); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : 'Your question could not be sent.'); }
+    finally { setPending(false); }
   }
 
   return (
@@ -91,7 +97,7 @@ export function SeniorProfile({ senior, focusQuestion, savedQuestion, onBack, on
       <div className="senior-profile-grid">
         <div className="senior-profile-main">
           <header className="senior-profile-header">
-            <StudentAvatar variant={senior.avatar} />
+            {seniorsConnected ? <ProfilePortrait name={senior.name} source={senior.picture || ''} /> : <StudentAvatar variant={senior.avatar} />}
             <div>
               <h1>{senior.name}</h1>
               <p className="senior-meta">{senior.major} · Year {senior.year}</p>
@@ -117,7 +123,7 @@ export function SeniorProfile({ senior, focusQuestion, savedQuestion, onBack, on
               );
             })}
           </section>
-          {senior.available && !savedQuestion && (
+          {senior.available && !savedQuestion && senior.suggestions.length > 0 && (
             <section className="senior-profile-section">
               <h2>A good question starts here</h2>
               <p>Not sure what to ask? Here are a couple of examples:</p>
@@ -143,24 +149,25 @@ export function SeniorProfile({ senior, focusQuestion, savedQuestion, onBack, on
             </div>
           ) : savedQuestion ? (
             <div className="senior-question-result">
-              <div role="status"><Check size={30} aria-hidden="true" /><h3>Question saved in preview.</h3></div>
-              <p>No question has been sent. Your draft is kept until you leave Ask a Senior.</p>
+              <div role="status"><Check size={30} aria-hidden="true" /><h3>{seniorsConnected ? 'Question sent.' : 'Question saved in preview.'}</h3></div>
+              <p>{seniorsConnected ? 'You can check for an answer in Your questions.' : 'No question has been sent. Your draft is kept until you leave Ask a Senior.'}</p>
               <h4>{savedQuestion.topic}</h4>
               <blockquote>{savedQuestion.message}</blockquote>
-              <Button onClick={onEdit}>Edit question</Button>
+              <Button onClick={onEdit}>{seniorsConnected ? 'Ask another question' : 'Edit question'}</Button>
             </div>
           ) : (
             <form className="senior-question-form" onSubmit={handleSubmit}>
               <label htmlFor="senior-topic">Topic</label>
               <select id="senior-topic" value={topic} onChange={event => setTopic(event.target.value)}>
+                {!senior.topics.length && <option>General</option>}
                 {senior.topics.map(item => <option key={item.title}>{item.title}</option>)}
               </select>
               <label htmlFor="senior-question">Your question</label>
               <textarea id="senior-question" ref={questionRef} value={message} onChange={event => setMessage(event.target.value)} required maxLength={2000} placeholder="What are you working on, and where are you getting stuck?" aria-invalid={Boolean(error)} aria-describedby={error ? 'senior-question-hint senior-question-error' : 'senior-question-hint'} />
               <p id="senior-question-hint" className="senior-form-hint">Include what you’ve tried so far.</p>
               {error && <p id="senior-question-error" className="senior-error" role="alert">{error}</p>}
-              <Button type="submit">Save preview question <ArrowRight size={19} aria-hidden="true" /></Button>
-              <p className="senior-form-note">Preview only. Questions are not sent to seniors or Messages.</p>
+              <Button type="submit" disabled={pending}>{pending ? 'Sending...' : seniorsConnected ? 'Send question' : 'Save preview question'} <ArrowRight size={19} aria-hidden="true" /></Button>
+              {!seniorsConnected && <p className="senior-form-note">Preview only. Questions are not sent to seniors or Messages.</p>}
             </form>
           )}
         </aside>
@@ -172,16 +179,18 @@ export function SeniorProfile({ senior, focusQuestion, savedQuestion, onBack, on
 
 interface SeniorApplicationFormProps {
   application: SeniorApplication | null;
-  onSave: (application: SeniorApplication) => void;
+  onSave: (application: SeniorApplication) => Promise<void>;
   onBack: () => void;
 }
 
 export function SeniorApplicationForm({ application, onSave, onBack }: SeniorApplicationFormProps) {
   const [editing, setEditing] = useState(!application);
   const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending) return;
     const form = new FormData(event.currentTarget);
     const value = (name: string) => String(form.get(name) ?? '').trim();
     const details: SeniorApplication = {
@@ -199,8 +208,12 @@ export function SeniorApplicationForm({ application, onSave, onBack }: SeniorApp
       return;
     }
     setError('');
-    onSave(details);
-    setEditing(false);
+    setPending(true);
+    try {
+      await onSave(details);
+      setEditing(false);
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Your profile could not be saved.'); }
+    finally { setPending(false); }
   }
 
   return (
@@ -214,8 +227,8 @@ export function SeniorApplicationForm({ application, onSave, onBack }: SeniorApp
       </header>
       {!editing && application ? (
         <section className="senior-application-form senior-application-review" aria-label="Your senior application">
-          <div role="status"><Check size={28} aria-hidden="true" /><h2>Application saved in preview.</h2></div>
-          <p>This has not been submitted for review, and your profile is not listed as a senior. It stays here until you leave Ask a Senior.</p>
+          <div role="status"><Check size={28} aria-hidden="true" /><h2>{seniorsConnected ? 'Senior profile saved.' : 'Application saved in preview.'}</h2></div>
+          <p>{seniorsConnected ? 'Your senior profile is now listed and available to help.' : 'This has not been submitted for review, and your profile is not listed as a senior. It stays here until you leave Ask a Senior.'}</p>
           <dl>
             <div><dt>Name</dt><dd>{application.name}</dd></div>
             <div><dt>Study details</dt><dd>{application.major} · {application.year}</dd></div>
@@ -235,7 +248,7 @@ export function SeniorApplicationForm({ application, onSave, onBack }: SeniorApp
           <label htmlFor="senior-app-year">Year of study</label>
           <select id="senior-app-year" name="year" defaultValue={application?.year ?? ''} required>
             <option value="" disabled>Select your year</option>
-            {['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5 or above', 'Postgraduate'].map(year => <option key={year}>{year}</option>)}
+            {seniorsConnected ? [1, 2, 3, 4, 5].map(year => <option key={year} value={year}>Year {year}</option>) : ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5 or above', 'Postgraduate'].map(year => <option key={year}>{year}</option>)}
           </select>
           <label htmlFor="senior-app-courses">Courses you can help with</label>
           <input id="senior-app-courses" name="courses" defaultValue={application?.courses} required maxLength={250} placeholder="e.g. Data Structures, Linear Algebra" />
@@ -247,10 +260,10 @@ export function SeniorApplicationForm({ application, onSave, onBack }: SeniorApp
           <input id="senior-app-availability" name="availability" defaultValue={application?.availability} required maxLength={200} placeholder="e.g. Weekday evenings, around 1–2 hours a week" />
           {error && <p className="senior-error" role="alert">{error}</p>}
           <div className="senior-application-actions">
-            <Button type="submit">Save preview application <ArrowRight size={18} aria-hidden="true" /></Button>
+            <Button type="submit" disabled={pending}>{pending ? 'Saving...' : seniorsConnected ? 'Save senior profile' : 'Save preview application'} <ArrowRight size={18} aria-hidden="true" /></Button>
             <button className="senior-text-button" type="button" onClick={onBack}>Cancel</button>
           </div>
-          <p className="senior-form-note">Preview only. Your application is not sent or saved to an account.</p>
+          {!seniorsConnected && <p className="senior-form-note">Preview only. Your application is not sent or saved to an account.</p>}
         </form>
       )}
     </>

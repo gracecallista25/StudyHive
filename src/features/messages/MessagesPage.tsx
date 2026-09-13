@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, ChevronRight, FileText, Info, MessageCircle, Paperclip, Pin, Search, Send, SquarePen, X } from 'lucide-react';
 import { StudentAvatar } from '../../shared/components';
-import { countUnreadConversations, filterConversations, people, readConversations, saveConversations, type ChatFile, type Conversation } from './messages';
+import { countUnreadConversations, filterConversations, people, readConversations, saveConversations, messagesConnected, loadConversations, loadMessages, postMessage, createConversation, type ChatFile, type Conversation } from './messages';
 import { ChatAvatar, FileLink } from './MessageComponents';
 import './messages.css';
 
-export function MessagesPage() {
-  const [chats, setChats] = useState(readConversations);
-  const [activeId, setActiveId] = useState(() => chats[0].id);
+export function MessagesPage({ userId }: { userId: string | null }) {
+  const [chats, setChats] = useState<Conversation[]>(messagesConnected && userId ? [] : readConversations);
+  const [activeId, setActiveId] = useState(() => chats[0]?.id || '');
+  const [backendLoading, setBackendLoading] = useState(messagesConnected && !!userId);
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -25,12 +26,26 @@ export function MessagesPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const messageEnd = useRef<HTMLDivElement>(null);
   const composer = useRef<HTMLTextAreaElement>(null);
-  const chat = chats.find(c => c.id === activeId) || chats[0];
+  const chat = chats.find(c => c.id === activeId) || chats[0] || { id: '', name: 'Messages', kind: 'personal' as const, members: [], unread: 0, description: '', messages: [] };
   const draft = drafts[chat.id] || '';
   const attachment = attachments[chat.id];
   const visible = filterConversations(chats, filter, query);
   const sharedFiles = chat.messages.flatMap(m => m.file ? [m.file] : []);
   useEffect(() => {
+    if (!messagesConnected || !userId) return;
+    let active = true;
+    setBackendLoading(true);
+    loadConversations(userId, query).then(items => { if (active) { setChats(items); if (!activeId && items[0]) setActiveId(items[0].id); } })
+      .catch(reason => { if (active) setSaveError(reason instanceof Error ? reason.message : 'Messages could not be loaded.'); })
+      .finally(() => { if (active) setBackendLoading(false); });
+    return () => { active = false; };
+  }, [userId, query, activeId]);
+  useEffect(() => {
+    if (!messagesConnected || !userId || !activeId) return;
+    loadMessages(activeId, userId).then(messages => setChats(previous => previous.map(item => item.id === activeId ? { ...item, messages } : item))).catch(() => undefined);
+  }, [userId, activeId]);
+  useEffect(() => {
+    if (messagesConnected) return;
     try { saveConversations(chats); setSaveError(''); }
     catch { setSaveError('Browser storage is full or unavailable. New messages will only last for this visit.'); }
     window.dispatchEvent(new CustomEvent('studyhive:unread-chats', { detail: countUnreadConversations(chats) }));
@@ -51,9 +66,13 @@ export function MessagesPage() {
     setActiveId(c.id); setMobileChat(true); setDetails(false); setError(''); setDetailsTab('members');
     setChats(previous => previous.map(item => item.id === c.id ? { ...item, unread: 0 } : item));
   }
-  function sendMessage() {
+  async function sendMessage() {
     if ((!draft.trim() && !attachment) || loadingFile) return;
     const next = { id: crypto.randomUUID(), sender: 'you', text: draft.trim(), time: new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(new Date()), ...(attachment ? { file: attachment } : {}) };
+    if (messagesConnected && userId) {
+      try { await postMessage(chat.id, userId, draft.trim()); }
+      catch (reason) { setError(reason instanceof Error ? reason.message : 'The message could not be sent.'); return; }
+    }
     setChats(previous => {
       const updated = { ...chat, messages: [...chat.messages, next] };
       return [updated, ...previous.filter(c => c.id !== chat.id)];
@@ -73,8 +92,15 @@ export function MessagesPage() {
     } catch { setError('This file could not be attached. Please try again.'); }
     finally { setLoadingFile(false); if (fileInput.current) fileInput.current.value = ''; }
   }
-  function createChat() {
+  async function createChat() {
     if (!selectedPeople.length || (newKind === 'group' && !newName.trim())) return;
+    if (messagesConnected && userId) {
+      try {
+        const created = await createConversation(userId, newKind as 'personal' | 'group', selectedPeople, newKind === 'group' ? newName.trim() : undefined);
+        setChats(previous => [created, ...previous.filter(item => item.id !== created.id)]); setActiveId(created.id); setMobileChat(true); dialog.current?.close();
+      } catch (reason) { setError(reason instanceof Error ? reason.message : 'The conversation could not be created.'); }
+      return;
+    }
     if (newKind === 'personal') {
       const existing = chats.find(c => c.kind === 'personal' && c.members[0] === selectedPeople[0]);
       if (existing) { setFilter('all'); setQuery(''); openChat(existing); dialog.current?.close(); return; }
@@ -86,8 +112,9 @@ export function MessagesPage() {
 
   return <section className="messages-page" aria-label="Messages">
     <header className="msg-page-header"><div><div className="breadcrumb"><a href="#home">Home</a><ChevronRight size={13} /><strong>Messages</strong></div><h1>Messages</h1><p>A little conversation. A brighter connection.</p></div><button className="button msg-new" aria-label="New message" onClick={() => { setSelectedPeople([]); setNewName(''); setNewKind('personal'); dialog.current?.showModal(); }}><SquarePen size={18} /><span>New message</span></button></header>
-    <div className="msg-preview"><span><span className="msg-preview-dot" />Local preview</span><p>Sample conversations · Messages stay in this browser.</p></div>
+    <div className="msg-preview"><span><span className="msg-preview-dot" />{messagesConnected ? 'Connected inbox' : 'Local preview'}</span><p>{messagesConnected ? 'Conversations and messages come from StudyHive.' : 'Sample conversations · Messages stay in this browser.'}</p></div>
     {saveError && <p role="alert" className="msg-error">{saveError}</p>}
+    {backendLoading && <p role="status" className="msg-loading">Loading conversations...</p>}
     <div className={`msg-workspace${mobileChat ? ' msg-mobile-chat' : ''}${details ? ' msg-with-details' : ''}`}>
       <aside className="msg-inbox" aria-label="Conversations"><div className="msg-inbox-tools"><label className="msg-search"><Search size={18} /><input aria-label="Search messages" placeholder="Search messages" value={query} onChange={e => setQuery(e.target.value)} />{query && <button aria-label="Clear search" onClick={() => setQuery('')}><X size={14} /></button>}</label><div className="msg-filters" aria-label="Filter conversations">{['all', 'personal', 'group'].map(f => <button key={f} aria-pressed={filter === f} onClick={() => setFilter(f)}>{f === 'group' ? 'Groups' : f === 'all' ? 'All' : 'Personal'}</button>)}</div></div>
         <div className="msg-conversation-list">{visible.map(c => { const last = c.messages.at(-1); return <button key={c.id} className={`msg-conversation${chat.id === c.id ? ' is-active' : ''}`} aria-current={chat.id === c.id ? 'true' : undefined} onClick={() => openChat(c)}><ChatAvatar chat={c} /><span className="msg-conversation-copy"><span className="msg-conversation-top"><strong>{c.name}</strong><time>{last?.time}</time></span><span className="msg-conversation-bottom"><span>{last ? `${last.sender === 'you' ? 'You: ' : ''}${last.text || last.file?.name || ''}` : 'Start a conversation'}</span>{c.unread > 0 && <b aria-label={`${c.unread} unread messages`}>{c.unread}</b>}</span>{c.kind === 'group' && <small>{c.members.length + 1} members</small>}</span></button>; })}{!visible.length && <div className="msg-empty"><Search size={27} /><h3>No conversations found</h3><p>Try another name or filter.</p><button onClick={() => { setQuery(''); setFilter('all'); }}>Clear filters</button></div>}</div><div className="msg-inbox-footer"><MessageCircle size={16} /><span>Same campus. Closer together.</span></div>

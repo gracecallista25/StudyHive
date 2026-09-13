@@ -41,7 +41,6 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
   }
 
   function validateSearch() {
-    if (!course) return 'Choose a course from the list.';
     if (!!filters.start_time !== !!filters.end_time) {
       return 'Enter both start and end time, or leave both empty.';
     }
@@ -163,18 +162,18 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
       <header className="hero">
         <div className="hero-copy">
           <p className="breadcrumb">Campus <span>/</span><strong>Study Buddy</strong></p>
-          <h1>Find a Study Buddy</h1>
+          <h1>Good company.<br />Better progress.</h1>
           <p className="hero-subtitle">{screen === 'create' ? 'Invite someone to study with you.' : 'What are you studying today?'}</p>
         </div>
         <AcademicArt />
       </header>
 
-      {!userId && <p className="buddy-note">You can browse listings. <a href="#login">Log in</a> to create a listing or send a request.</p>}
+      {!userId && <p className="buddy-note">You can browse listings. <a className="login-action" href="#login">Log in</a> to create a listing or send a request.</p>}
 
-      {screen === 'search' && (
+      {screen !== 'create' && (
         <form className="buddy-start buddy-search-form" onSubmit={search}>
           <fieldset disabled={pending} className="buddy-live-fields">
-            <CoursePicker value={course} onChange={setCourse} />
+            <CoursePicker value={course} onChange={setCourse} required={false} allowCustom />
             <ListingSearchFields filters={filters} onChange={next => { setFilters(next); setError(''); }} />
             <div className="buddy-search-actions">
               <Button type="submit">{pending ? 'Finding study buddies…' : 'Find Study Buddies'}<ArrowRight size={17} /></Button>
@@ -188,7 +187,7 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
       {screen === 'create' && (
         <form className="buddy-start" onSubmit={publish}>
           <fieldset disabled={pending} className="buddy-live-fields">
-            <CoursePicker value={course} onChange={setCourse} />
+            <CoursePicker value={course} onChange={setCourse} allowCustom />
             <label>Date<input type="date" name="date" required /></label>
             <div className="buddy-time-fields">
               <label>Start time<input type="time" name="start_time" required /></label>
@@ -204,15 +203,6 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
 
       {screen === 'results' && (
         <section aria-label="Study buddy results">
-          <div className="buddy-selection">
-            <div><span>Studying:</span><strong>{course}</strong></div>
-            {filters.major && <div><span>Major:</span><strong>{filters.major}</strong></div>}
-            {filters.date && <div><span>Date:</span><strong>{filters.date}</strong></div>}
-            {filters.start_time && filters.end_time && <div><span>Time:</span><strong>{filters.start_time}–{filters.end_time}</strong></div>}
-            {filters.location.trim() && <div><span>Location:</span><strong>{filters.location.trim()}</strong></div>}
-            <button className="reset-link" disabled={pending} onClick={() => changeScreen('search')}>Change</button>
-            <button className="reset-link" disabled={pending} onClick={() => void search()}>Refresh</button>
-          </div>
           <p className="buddy-count">{listings.filter(item => !item.example).length} open study listings · {listings.filter(item => item.example).length} example profiles</p>
 
           {current ? (
@@ -243,8 +233,7 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
               <h2>No study buddies found right now.</h2>
               <p>Be the first to create a listing for this course.</p>
               <div className="buddy-actions">
-                <Button onClick={() => changeScreen('search')}>Change Course</Button>
-                <Button disabled={!userId} onClick={() => changeScreen('create')}>Create a study listing</Button>
+                <Button onClick={() => document.getElementById('buddy-course')?.focus()}>Change Course</Button>
               </div>
             </div>
           )}

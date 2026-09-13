@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Clock, MapPin, UsersRound } from 'lucide-react';
+import { Clock, MapPin, Plus, UsersRound } from 'lucide-react';
 import { Button } from '../../shared/components';
 import { CoursePicker } from '../study-buddy/StudyBuddyComponents';
 import { ListingSearchFields } from '../study-buddy/StudyBuddyComponents';
@@ -68,7 +68,7 @@ function GroupCard({ group, userId, pending, sent, onJoin, onRefresh, onCancel }
       </details>
       <div className="group-card-actions">
         {group.status !== 'cancelled' && (
-          isMember ? <span>You’re a member</span> : !userId ? <a href="#login">Log in to request a seat</a> : (
+          isMember ? <span>You’re a member</span> : !userId ? <a className="login-action" href="#login">Log in to request a seat</a> : (
             <Button disabled={pending || sent || isFull} onClick={onJoin}>{joinLabel}</Button>
           )
         )}
@@ -205,7 +205,7 @@ export function StudyGroupsPage({ userId }: { userId: string | null }) {
 
   return (
     <div className="page-content buddy-page groups-page">
-      <header>
+      <header className="group-hero">
         <p className="breadcrumb">
           Campus <span>/</span>
           <strong>Study Groups</strong>
@@ -216,18 +216,19 @@ export function StudyGroupsPage({ userId }: { userId: string | null }) {
           A lot of progress.
         </h1>
         <p className="group-subtitle">Find a study room, bring your questions, and learn together.</p>
+        {screen === 'search' && <Button disabled={pending} onClick={handleStartCreating}><Plus size={22} aria-hidden="true" />Create a room</Button>}
       </header>
 
       <div className="group-toolbar">
         <h2>{screen === 'create' ? 'Create a study room' : 'Find your study room'}</h2>
-        {screen === 'search' && <Button disabled={pending} onClick={handleStartCreating}>Create a room</Button>}
+
       </div>
 
       {error && <p role="alert" className="group-error">{error}</p>}
       {feedback && <p role="status" className="group-feedback">{feedback}</p>}
 
       {screen === 'search' ? (
-        <form className="group-form" onSubmit={handleSearch}>
+        <form className="group-form group-search-form" onSubmit={handleSearch}>
           <fieldset disabled={pending}>
             <CoursePicker key={pickerVersion} value={course} onChange={setCourse} required={false} allowCustom />
             <ListingSearchFields filters={filters} onChange={setFilters} />
@@ -240,7 +241,7 @@ export function StudyGroupsPage({ userId }: { userId: string | null }) {
       ) : (
         <form className="group-form" onSubmit={handlePublish}>
           {!userId ? (
-            <p><a href="#login">Log in</a> to create a study room.</p>
+            <p><a className="login-action" href="#login">Log in</a> to create a study room.</p>
           ) : (
             <fieldset disabled={pending}>
               <div className="buddy-search-grid">

@@ -103,8 +103,8 @@ test('expanded search sends backend filters and preserves them when changing res
   await page.screenshot({ path: testInfo.outputPath('expanded-search.png'), fullPage: true });
   await search(page);
   expect(Object.fromEntries(query!)).toEqual({ course: 'Data Structures', viewer_id: 'viewer', major: 'Computer Science', date: '2026-10-20', start_time: '18:00', end_time: '21:00', location: 'Library' });
-  await expect(page.locator('.buddy-selection')).toContainText('Computer Science');
-  await page.getByRole('button', { name: 'Change', exact: true }).click();
+  await expect(page.locator('.buddy-selection')).toHaveCount(0);
+  await expect(page.getByLabel('Major', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Start time', { exact: true })).toHaveValue('18:00');
   await expect(page.getByLabel('Major', { exact: true })).toHaveValue('Computer Science');
   await page.getByRole('button', { name: 'Clear optional filters' }).click();

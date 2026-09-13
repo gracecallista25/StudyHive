@@ -6,7 +6,7 @@ import type { Degree } from '../auth/auth';
 import { Badge, Button } from '../../shared/components';
 import { majorsByDegree, degreeOptions, maxYearByDegree } from '../auth/auth';
 import { StudentAvatar } from '../../shared/components';
-import { courses } from './studyBuddy';
+import { courses, loadCourses, studyBuddyConnected } from './studyBuddy';
 import type { Student, StudentFilters, ListingSearchFilters } from './studyBuddy';
 
 
@@ -19,9 +19,11 @@ interface CoursePickerProps {
 
 export function CoursePicker({ value, onChange, required = true, allowCustom = false }: CoursePickerProps) {
   const [query, setQuery] = useState(value);
+  const [availableCourses, setAvailableCourses] = useState(courses);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
-  const options = courses.filter(course => course.toLowerCase().includes(query.trim().toLowerCase()));
+  useEffect(() => { if (studyBuddyConnected) loadCourses().then(setAvailableCourses).catch(() => undefined); }, []);
+  const options = availableCourses.filter(course => course.toLowerCase().includes(query.trim().toLowerCase()));
 
   function chooseCourse(course: string) {
     (document.getElementById('buddy-course') as HTMLInputElement | null)?.setCustomValidity('');
@@ -33,7 +35,7 @@ export function CoursePicker({ value, onChange, required = true, allowCustom = f
 
   function handleInputChange(nextValue: string) {
     setQuery(nextValue);
-    onChange(allowCustom ? nextValue : courses.find(course => course.toLowerCase() === nextValue.trim().toLowerCase()) ?? '');
+    onChange(allowCustom ? nextValue : availableCourses.find(course => course.toLowerCase() === nextValue.trim().toLowerCase()) ?? '');
     setOpen(true);
     setActive(-1);
     (document.getElementById('buddy-course') as HTMLInputElement | null)?.setCustomValidity('');

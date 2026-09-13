@@ -3,8 +3,9 @@ import type { FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, Brush, Check, Clock3, Code2, FileText, Layers, Users } from 'lucide-react';
 import { Button, CampusArt } from '../../shared/components';
 import { StudentAvatar } from '../../shared/components';
-import { projectTypes } from './projects';
+import { projectTypes, projectsConnected } from './projects';
 import type { Project, ProjectArt } from './projects';
+import { ProfilePortrait } from '../profile/ProfilePortrait';
 
 
 export function ProjectArtwork({ variant }: { variant: ProjectArt }) {
@@ -49,7 +50,7 @@ export function ProjectArtwork({ variant }: { variant: ProjectArt }) {
 }
 
 export function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
-  const skills = [...new Set(project.roles.map(role => role.skills[0]))];
+  const skills = [...new Set(project.roles.flatMap(role => role.skills.slice(0, 1)))];
 
   return (
     <article className="project-card">
@@ -66,7 +67,7 @@ export function ProjectCard({ project, onOpen }: { project: Project; onOpen: () 
       <div className="project-card-footer">
         <div className="project-team-preview">
           <div className="project-avatar-stack" aria-label={project.team.map(member => member.name).join(', ')}>
-            {project.team.map(member => <StudentAvatar key={member.name} variant={member.avatar} />)}
+            {project.team.map((member, index) => projectsConnected ? <ProfilePortrait key={index} name={member.name} source={member.picture || ''} /> : <StudentAvatar key={index} variant={member.avatar} />)}
           </div>
           <span>{project.roles.length === 0 ? 'Team full' : `${project.roles.length} open ${project.roles.length === 1 ? 'role' : 'roles'}`}</span>
         </div>
@@ -78,11 +79,13 @@ export function ProjectCard({ project, onOpen }: { project: Project; onOpen: () 
   );
 }
 
-export function CreateProjectForm({ onBack, onCreate }: { onBack: () => void; onCreate: (project: Project) => void }) {
+export function CreateProjectForm({ onBack, onCreate }: { onBack: () => void; onCreate: (project: Project) => Promise<void> }) {
   const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending) return;
     const form = new FormData(event.currentTarget);
     const value = (name: string) => String(form.get(name) ?? '').trim();
     const skills = [...new Set(value('skills').split(',').map(skill => skill.trim()).filter(Boolean))];
@@ -92,7 +95,9 @@ export function CreateProjectForm({ onBack, onCreate }: { onBack: () => void; on
       return;
     }
 
-    onCreate({
+    setPending(true);
+    setError('');
+    try { await onCreate({
       id: crypto.randomUUID(),
       title: value('title'),
       summary: value('summary'),
@@ -104,6 +109,8 @@ export function CreateProjectForm({ onBack, onCreate }: { onBack: () => void; on
       roles: [{ title: value('role'), description: 'Bring your skills and help shape this project together.', skills }],
       team: [{ name: 'You', role: 'Project lead · Preview', avatar: 'lin' }],
     });
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'The project could not be saved.'); }
+    finally { setPending(false); }
   }
 
   return (
@@ -125,8 +132,8 @@ export function CreateProjectForm({ onBack, onCreate }: { onBack: () => void; on
         <input id="new-project-skills" name="skills" maxLength={150} required placeholder="e.g. React, UI design" aria-describedby="project-skills-help" />
         <small id="project-skills-help">Separate skills with commas.</small>
         {error && <p className="project-error" role="alert">{error}</p>}
-        <Button type="submit">Create preview project <ArrowRight size={18} aria-hidden="true" /></Button>
-        <p className="project-form-note">This preview stays in this page’s memory. It is not published or saved to an account.</p>
+        <Button type="submit" disabled={pending}>{pending ? 'Saving...' : projectsConnected ? 'Create project' : 'Create preview project'} <ArrowRight size={18} aria-hidden="true" /></Button>
+        {!projectsConnected && <p className="project-form-note">This preview stays in this page’s memory. It is not published or saved to an account.</p>}
       </form>
     </>
   );
@@ -137,22 +144,28 @@ interface ProjectDetailProps {
   project: Project;
   requested: boolean;
   onBack: () => void;
-  onRequest: () => void;
+  onRequest: (role: string, message: string) => Promise<void>;
+  canRequest: boolean;
 }
 
-export function ProjectDetail({ project, requested, onBack, onRequest }: ProjectDetailProps) {
+export function ProjectDetail({ project, requested, onBack, onRequest, canRequest }: ProjectDetailProps) {
   const [role, setRole] = useState(project.roles[0]?.title ?? '');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending || !canRequest) return;
     if (!message.trim()) {
       setError('Add a short introduction before requesting to join.');
       return;
     }
     setError('');
-    onRequest();
+    setPending(true);
+    try { await onRequest(role, message.trim()); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : 'The request could not be sent.'); }
+    finally { setPending(false); }
   }
 
   return (
@@ -200,7 +213,7 @@ export function ProjectDetail({ project, requested, onBack, onRequest }: Project
             <div className="project-team">
               {project.team.map(member => (
                 <div className="project-member" key={member.name}>
-                  <StudentAvatar variant={member.avatar} />
+                  {projectsConnected ? <ProfilePortrait name={member.name} source={member.picture || ''} /> : <StudentAvatar variant={member.avatar} />}
                   <div><h3>{member.name}</h3><p>{member.role}</p><small>HITSZ · Shenzhen</small></div>
                 </div>
               ))}
@@ -222,8 +235,8 @@ export function ProjectDetail({ project, requested, onBack, onRequest }: Project
           {requested ? (
             <div className="project-request-success" role="status">
               <Check size={30} aria-hidden="true" />
-              <h3>Request saved in preview</h3>
-              <p>Your introduction is ready for this demo. No request has been sent to a project lead.</p>
+              <h3>{projectsConnected ? 'Request sent' : 'Request saved in preview'}</h3>
+              <p>{projectsConnected ? 'Your request is waiting for the project lead.' : 'Your introduction is ready for this demo. No request has been sent to a project lead.'}</p>
             </div>
           ) : project.roles.length === 0 ? (
             <p className="project-closed-note">This team is full. Browse other projects to find an open role.</p>
@@ -236,8 +249,9 @@ export function ProjectDetail({ project, requested, onBack, onRequest }: Project
               <label htmlFor="project-introduction">Introduce yourself</label>
               <textarea id="project-introduction" value={message} onChange={event => setMessage(event.target.value)} required maxLength={1000} placeholder="Share your skills and what you’d like to contribute." aria-describedby={error ? 'project-request-error' : undefined} />
               {error && <p className="project-error" id="project-request-error" role="alert">{error}</p>}
-              <Button type="submit">Request to join <ArrowRight size={19} aria-hidden="true" /></Button>
-              <p className="project-form-note">Preview only. This does not send a real request.</p>
+              <Button type="submit" disabled={pending || !canRequest}>{pending ? 'Sending...' : 'Request to join'} <ArrowRight size={19} aria-hidden="true" /></Button>
+              {!canRequest && <p className="project-form-note"><a className="login-action" href="#login">Log in</a> to request a role in another student's project.</p>}
+              {!projectsConnected && <p className="project-form-note">Preview only. This does not send a real request.</p>}
             </form>
           )}
         </aside>

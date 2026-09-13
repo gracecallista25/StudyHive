@@ -2,7 +2,7 @@
 
 test('required course, one-at-a-time ranked results, reversible navigation and mock requests', async ({ page }) => {
   await page.goto('/#study-buddy');
-  await expect(page.getByRole('heading', { name: 'Find a Study Buddy', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Good company. Better progress.', exact: true })).toBeVisible();
   await expect(page.locator('.student-card')).toHaveCount(0);
   await expect(page.getByRole('combobox')).toHaveCount(1);
   await page.getByRole('button', { name: 'Find Study Buddies' }).click();

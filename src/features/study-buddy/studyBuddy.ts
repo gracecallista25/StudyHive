@@ -121,6 +121,15 @@ for (const [courseIndex, [course, first, second, lookingFor]] of courseExamples.
 }
 export const studyBuddyConnected = Boolean(import.meta.env.VITE_API_BASE_URL?.trim());
 
+export async function loadCourses() {
+  const base = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '');
+  if (!base) return courses;
+  const response = await fetch(base + '/courses', { signal: AbortSignal.timeout(15000) });
+  const data = await response.json();
+  if (data.status !== 'success' || !Array.isArray(data.courses)) throw new Error('Courses could not be loaded.');
+  return data.courses.filter((course: unknown): course is string => typeof course === 'string');
+}
+
 export interface Listing {
   id: string;
   course: string;
@@ -238,7 +247,7 @@ export async function browseListings(course: string, userId: string | null, filt
   if (!Array.isArray(data.listings)) throw new Error('The backend did not return listings.');
   return data.listings
     .map(parseListing)
-    .filter(item => item.status === 'open' && item.created_by.id !== userId && item.course.trim().toLowerCase() === course.trim().toLowerCase());
+    .filter(item => item.status === 'open' && item.created_by.id !== userId);
 }
 
 export async function sendStudyRequest(listingId: string, userId: string) {

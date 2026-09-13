@@ -50,10 +50,10 @@ function App() {
   const content = {
     'study-buddy': studyBuddyConnected ? <ConnectedStudyBuddy userId={userId} /> : <><div className="demo-banner"><span>Study Buddy demo · Fictional profiles</span><a href="#login">Back to login</a></div><StudyBuddyPage /></>,
     'study-groups': <StudyGroupsPage userId={userId} />,
-    projects: <ProjectsPage />,
-    'ask-senior': <AskSeniorPage />,
-    messages: <MessagesPage />,
-    notifications: <NotificationsPage />,
+    projects: <ProjectsPage userId={userId} />,
+    'ask-senior': <AskSeniorPage userId={userId} />,
+    messages: <MessagesPage userId={userId} />,
+    notifications: <NotificationsPage userId={userId} />,
     profile: <ProfilePage userId={userId} />,
   }[page];
   return <AppLayout active={page}>{content}</AppLayout>;
