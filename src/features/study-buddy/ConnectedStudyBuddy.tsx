@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { AcademicArt } from '../../shared/components';
 import { Button } from '../../shared/components';
 import { StudentAvatar } from '../../shared/components';
@@ -26,13 +26,11 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
 
   const [screen, setScreen] = useState<Screen>('search');
   const [listings, setListings] = useState<SearchListing[]>([]);
-  const [index, setIndex] = useState(0);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [sent, setSent] = useState<Set<string>>(new Set());
   const busy = useRef(false);
-  const current = listings[index];
 
   function changeScreen(nextScreen: Screen) {
     setError('');
@@ -67,7 +65,6 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
     try {
       const realListings = await browseListings(course, userId, filters);
       setListings([...realListings, ...exampleListings(course, filters)]);
-      setIndex(0);
       setScreen('results');
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Could not load listings.');
@@ -77,10 +74,20 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
     }
   }
 
-  async function send() {
-    if (!current || busy.current || sent.has(current.id)) return;
-    if (current.example) {
-      setSent(ids => new Set(ids).add(current.id));
+  useEffect(() => {
+    let active = true;
+    browseListings(course, userId, filters)
+      .then(realListings => {
+        if (active) setListings([...realListings, ...exampleListings(course, filters)]);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  async function send(listing: SearchListing) {
+    if (busy.current || sent.has(listing.id)) return;
+    if (listing.example) {
+      setSent(ids => new Set(ids).add(listing.id));
       return;
     }
     if (!userId) {
@@ -92,8 +99,8 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
     setPending(true);
     setError('');
     try {
-      await sendStudyRequest(current.id, userId);
-      setSent(ids => new Set(ids).add(current.id));
+      await sendStudyRequest(listing.id, userId);
+      setSent(ids => new Set(ids).add(listing.id));
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Could not send the request.');
     } finally {
@@ -147,16 +154,6 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
     setError('');
   }
 
-  function moveToPrevious() {
-    setIndex(previous => previous - 1);
-    setError('');
-  }
-
-  function moveToNext() {
-    setIndex(previous => previous + 1);
-    setError('');
-  }
-
   return (
     <div className="page-content buddy-page">
       <header className="hero">
@@ -201,33 +198,30 @@ export function ConnectedStudyBuddy({ userId }: { userId: string | null }) {
         </form>
       )}
 
-      {screen === 'results' && (
+      {(screen === 'results' || listings.length > 0) && (
         <section aria-label="Study buddy results">
           <p className="buddy-count">{listings.filter(item => !item.example).length} open study listings · {listings.filter(item => item.example).length} example profiles</p>
 
-          {current ? (
-            <>
-              <FocusedStudentCard
-                portrait={current.example ? <StudentAvatar variant={current.example.avatar} /> : <ProfilePortrait name={current.created_by.full_name} source={current.created_by.profile_picture} />}
-                name={current.created_by.full_name}
-                major={current.created_by.major}
-                degree={current.created_by.degree}
-                year={current.created_by.grade}
-                course={current.course}
-                notes={current.notes || ''}
-                presence={current.example ? 'Example profile · Simulated request' : 'Open study listing'}
-                date={current.date}
-                time={current.example ? current.example.time : `${current.start_time}–${current.end_time}`} mode={current.example?.mode}
-                location={current.location}
-              />
-              <p className="buddy-position" aria-live="polite">Listing {index + 1} of {listings.length}: {current.created_by.full_name}</p>
-              <div className="buddy-actions">
-                <Button disabled={pending || index === 0} onClick={moveToPrevious}><ArrowLeft size={16} />Back</Button>
-                <Button disabled={pending || (!current.example && !userId) || sent.has(current.id)} onClick={() => void send()}>{sent.has(current.id) ? (current.example ? 'Example request sent' : 'Request sent') : pending ? 'Please wait…' : (current.example ? 'Try Study Together' : 'Study Together')}</Button>
-                <Button disabled={pending || index === listings.length - 1} onClick={moveToNext}>Next<ArrowRight size={16} /></Button>
-              </div>
-              <p role="status" className="buddy-feedback">{sent.has(current.id) ? (current.example ? `Example request simulated for ${current.created_by.full_name}. No real request was sent.` : `Study request sent to ${current.created_by.full_name}.`) : ''}</p>
-            </>
+          {listings.length ? (
+            <div className="buddy-listing-grid">
+              {listings.map(listing => <div className="buddy-listing-item" key={listing.id}>
+                <FocusedStudentCard
+                  portrait={listing.example ? <StudentAvatar variant={listing.example.avatar} /> : <ProfilePortrait name={listing.created_by.full_name} source={listing.created_by.profile_picture} />}
+                  name={listing.created_by.full_name}
+                  major={listing.created_by.major}
+                  degree={listing.created_by.degree}
+                  year={listing.created_by.grade}
+                  course={listing.course}
+                  notes={listing.notes || ''}
+                  presence={listing.example ? 'Example profile · Simulated request' : 'Open study listing'}
+                  date={listing.date}
+                  time={listing.example ? listing.example.time : `${listing.start_time}–${listing.end_time}`} mode={listing.example?.mode}
+                  location={listing.location}
+                />
+                <Button disabled={pending || (!listing.example && !userId) || sent.has(listing.id)} onClick={() => void send(listing)}>{sent.has(listing.id) ? (listing.example ? 'Example request sent' : 'Request sent') : pending ? 'Please wait…' : (listing.example ? 'Try Study Together' : 'Study Together')}<ArrowRight size={16} /></Button>
+                <p role="status" className="buddy-feedback">{sent.has(listing.id) ? (listing.example ? `Example request simulated for ${listing.created_by.full_name}. No real request was sent.` : `Study request sent to ${listing.created_by.full_name}.`) : ''}</p>
+              </div>)}
+            </div>
           ) : (
             <div className="empty-state">
               <h2>No study buddies found right now.</h2>

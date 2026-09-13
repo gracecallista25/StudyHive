@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Clock, MapPin, Plus, UsersRound } from 'lucide-react';
 import { Button } from '../../shared/components';
@@ -121,6 +121,14 @@ export function StudyGroupsPage({ userId }: { userId: string | null }) {
       setSearched(true);
     });
   }
+
+  useEffect(() => {
+    void runRequest(async () => {
+      const result = await browseGroups({ course, ...filters }, userId);
+      setGroups(result);
+      setSearched(true);
+    });
+  }, [userId]);
 
   function handlePublish(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

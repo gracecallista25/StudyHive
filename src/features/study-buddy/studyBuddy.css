@@ -138,6 +138,11 @@
 .buddy-search-form .buddy-search-actions { grid-column:1 / -1; }
 .buddy-page .buddy-selection { background:var(--color-sage); border-color:#dfe5d7; }
 .buddy-page .buddy-card.buddy-focused { border:1px solid #bcc8bb; border-radius:12px; background:var(--color-cream); grid-template-columns:minmax(240px,40%) minmax(0,1fr); box-shadow:none; }
+.buddy-listing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.buddy-listing-item { min-width: 0; }
+.buddy-listing-item > .button { margin-top: 12px; width: 100%; justify-content: center; }
+.buddy-listing-item .buddy-feedback { min-height: 20px; }
+@media (max-width: 980px) { .buddy-listing-grid { grid-template-columns: minmax(0, 1fr); } }
 .buddy-person-panel { background:linear-gradient(140deg,#eaf0e4,#cfdbc2); padding:28px; }
 .buddy-page .buddy-person-panel .avatar,.buddy-page .buddy-person-panel .profile-portrait { width:clamp(130px,12vw,190px); height:clamp(130px,12vw,190px); }
 .buddy-detail-panel { padding:30px; }

@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GraduationCap, Search, UsersRound } from 'lucide-react';
 import { Button } from '../../shared/components';
 import { majorsByDegree } from '../auth/auth';
 
 import { SeniorApplicationForm, SeniorCard, SeniorProfile } from './SeniorComponents';
 import type { SeniorApplication } from './seniors';
-import { seniorMatchesFilters, seniors as sampleSeniors, seniorsConnected, loadSeniors, publishSenior, seniorApplication, sendSeniorQuestion, updateSeniorAvailability, loadAskedQuestions } from './seniors';
-import type { Senior, AskedQuestion } from './seniors';
+import { seniorMatchesFilters, seniors as sampleSeniors, seniorsConnected, loadSeniors, publishSenior, seniorApplication, sendSeniorQuestion, updateSeniorAvailability } from './seniors';
+import type { Senior } from './seniors';
 import type { SeniorQuestion } from './seniors';
 import './askSenior.css';
 
@@ -15,11 +15,7 @@ export function AskSeniorPage({ userId }: { userId: string | null }) {
   const [loading, setLoading] = useState(seniorsConnected);
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
-  const [askedQuestions, setAskedQuestions] = useState<AskedQuestion[]>([]);
   const [availabilityPending, setAvailabilityPending] = useState(false);
-  const [questionTopic, setQuestionTopic] = useState('');
-  const [questionText, setQuestionText] = useState('');
-  const [questionPending, setQuestionPending] = useState(false);
   const [search, setSearch] = useState('');
   const [course, setCourse] = useState('');
   const [major, setMajor] = useState('');
@@ -39,11 +35,10 @@ export function AskSeniorPage({ userId }: { userId: string | null }) {
     let active = true;
     setLoading(true);
     setError('');
-    Promise.all([loadSeniors(), userId ? loadAskedQuestions(userId) : Promise.resolve([])])
-      .then(([profiles, asked]) => {
+    loadSeniors()
+      .then(profiles => {
         if (!active) return;
         setSeniors(profiles);
-        setAskedQuestions(asked);
         const own = profiles.find(profile => profile.id === userId);
         setApplication(own ? seniorApplication(own) : null);
       })
@@ -68,34 +63,6 @@ export function AskSeniorPage({ userId }: { userId: string | null }) {
       setSeniors(items => items.map(item => item.id === saved.id ? saved : item));
     } catch { setError('Your availability could not be updated. Please try again.'); }
     finally { setAvailabilityPending(false); }
-  }
-
-  const availableSeniors = seniors.filter(senior => senior.available && senior.id !== userId);
-
-  async function submitQuestionFromInbox(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!questionText.trim() || questionPending || !availableSeniors.length) return;
-    setQuestionPending(true);
-    setError('');
-    try {
-      const question = {
-        topic: questionTopic || 'General',
-        message: questionText.trim()
-      };
-      if (seniorsConnected) {
-        if (!userId) throw new Error('Log in to ask a question.');
-        await Promise.all(availableSeniors.map(senior => sendSeniorQuestion(senior.id, userId, question)));
-      } else {
-        setQuestions(previous => ({ ...previous, public: { topic: question.topic, message: question.message } }));
-      }
-      setQuestionText('');
-      setQuestionTopic('');
-      if (seniorsConnected) setAttempt(value => value + 1);
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Your question could not be sent.');
-    } finally {
-      setQuestionPending(false);
-    }
   }
 
   const selected = seniors.find(senior => senior.id === selectedId);
@@ -183,22 +150,6 @@ export function AskSeniorPage({ userId }: { userId: string | null }) {
           {visibleSeniors.length === 0 && <div className="seniors-empty"><UsersRound size={36} aria-hidden="true" /><h2>No seniors found.</h2><p>Try another course, major, or search term.</p><Button onClick={clearFilters}>Clear filters</Button></div>}
         </>
       )}
-      {!selected && !showApplication && <section className="senior-profile-section">
-        <h2>Your questions</h2>
-        <form className="senior-question-form senior-inbox-question-form" onSubmit={submitQuestionFromInbox}>
-          <p className="senior-question-audience">Your question will be visible to all available seniors.</p>
-          <label htmlFor="inbox-question-topic">Topic (optional)</label>
-          <input id="inbox-question-topic" value={questionTopic} onChange={event => setQuestionTopic(event.target.value)} placeholder="e.g. Course planning" />
-          <label htmlFor="inbox-question-text">Your question</label>
-          <textarea id="inbox-question-text" value={questionText} onChange={event => setQuestionText(event.target.value)} minLength={10} maxLength={2000} required placeholder="What would you like help with?" />
-          <Button type="submit" disabled={questionPending || !availableSeniors.length}>{questionPending ? 'Sending...' : 'Post question'}</Button>
-        </form>
-        {seniorsConnected && <>
-          <button className="senior-text-button" onClick={() => setAttempt(value => value + 1)}>Refresh answers</button>
-          {!askedQuestions.length && <p>You have not sent any questions yet.</p>}
-          {askedQuestions.map(question => <article key={question.question_id}><h3>{question.topic}</h3><p>{question.question}</p><p>{question.answer || 'Waiting for an answer.'}</p></article>)}
-        </>}
-      </section>}
       <footer className="seniors-footer">Same campus. <em>Brighter together.</em></footer>
     </div>
   );

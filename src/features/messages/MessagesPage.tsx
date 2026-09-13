@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, ChevronRight, FileText, Info, MessageCircle, Paperclip, Pin, Search, Send, SquarePen, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronRight, FileText, Info, MessageCircle, Paperclip, Pin, Search, Send, X } from 'lucide-react';
 import { StudentAvatar } from '../../shared/components';
 import { countUnreadConversations, filterConversations, people, readConversations, saveConversations, messagesConnected, loadConversations, loadMessages, postMessage, createConversation, type ChatFile, type Conversation } from './messages';
 import { ChatAvatar, FileLink } from './MessageComponents';
@@ -111,7 +111,7 @@ export function MessagesPage({ userId }: { userId: string | null }) {
   }
 
   return <section className="messages-page" aria-label="Messages">
-    <header className="msg-page-header"><div><div className="breadcrumb"><a href="#home">Home</a><ChevronRight size={13} /><strong>Messages</strong></div><h1>Messages</h1><p>A little conversation. A brighter connection.</p></div><button className="button msg-new" aria-label="New message" onClick={() => { setSelectedPeople([]); setNewName(''); setNewKind('personal'); dialog.current?.showModal(); }}><SquarePen size={18} /><span>New message</span></button></header>
+    <header className="msg-page-header"><div><div className="breadcrumb"><a href="#home">Home</a><ChevronRight size={13} /><strong>Messages</strong></div><h1>Messages</h1><p>A little conversation. A brighter connection.</p></div></header>
     <div className="msg-preview"><span><span className="msg-preview-dot" />{messagesConnected ? 'Connected inbox' : 'Local preview'}</span><p>{messagesConnected ? 'Conversations and messages come from StudyHive.' : 'Sample conversations · Messages stay in this browser.'}</p></div>
     {saveError && <p role="alert" className="msg-error">{saveError}</p>}
     {backendLoading && <p role="status" className="msg-loading">Loading conversations...</p>}
