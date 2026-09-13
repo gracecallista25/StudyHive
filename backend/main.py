@@ -425,6 +425,9 @@ def register(request: RegisterRequest):
     if len(request.password) < 8:
         return {"status": "failed", "reason": "Password needs to be at least 8 characters"}
 
+    if len(request.student_id) != 10:
+        return {"status": "failed", "reason": "Student ID needs to be 10 characters"}
+
     if request.degree not in VALID_DEGREES:
         return {"status": "failed", "reason": "Degree must be 'bachelor' or 'master'"}
 
@@ -1924,6 +1927,43 @@ def seed_data():
         "availability_text": "Monday and Wednesday evenings",
         "available": True
     }
+
+ #fake pending notifications — so the inbox isn't empty on first look
+
+    # Bob wants to join Alice's study buddy listing
+    buddy_req_id = str(uuid.uuid4())
+    buddy_requests[buddy_req_id] = {
+        "listing_id": listing_id,
+        "from_user_id": bob_id,
+        "to_user_id": alice_id,
+        "status": "pending",
+        "created_at": datetime.utcnow().isoformat()
+    }
+
+    # Alice wants to join Bob's study group
+    group_req_id = str(uuid.uuid4())
+    group_requests[group_req_id] = {
+        "group_id": group_id,
+        "from_user_id": alice_id,
+        "to_user_id": bob_id,
+        "status": "pending",
+        "created_at": datetime.utcnow().isoformat()
+    }
+
+    # Alice wants to join Carol's project as Frontend developer
+    project_req_id = str(uuid.uuid4())
+    project_requests[project_req_id] = {
+        "project_id": project_id,
+        "from_user_id": alice_id,
+        "to_user_id": carol_id,
+        "desired_role": "Frontend developer",
+        "message": "I've built a few React apps before, would love to help out!",
+        "status": "pending",
+        "created_at": datetime.utcnow().isoformat()
+    }
+
+
+
 
 @app.on_event("startup")
 def on_startup():
